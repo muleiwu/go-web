@@ -61,12 +61,10 @@ func ErrorWithData(c *gin.Context, code int, message string, data interface{}) {
 
 // getHTTPStatus 根据业务错误码获取HTTP状态码
 func getHTTPStatus(code int) int {
-	switch {
-	case code >= 400 && code < 500:
+	// 如果是标准HTTP状态码，直接返回
+	if code >= 400 && code < 600 {
 		return code
-	case code >= 500:
-		return code
-	default:
-		return http.StatusOK
 	}
+	// 其他情况返回200
+	return http.StatusOK
 }

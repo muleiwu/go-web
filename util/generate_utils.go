@@ -7,7 +7,7 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// 生成一个随机的16位字符串
+// GenerateId 生成一个随机的16位字符串
 func GenerateId(length int) string {
 	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	unionId := make([]byte, length)

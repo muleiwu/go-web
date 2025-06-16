@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gin-gonic/gin"
-	"mliev.com/template/go-web/app/Middleware"
+	"mliev.com/template/go-web/app/middleware"
 )
 
 type MiddlewareConfig struct {
