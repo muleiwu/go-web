@@ -11,6 +11,7 @@ var (
 	rdbOnce sync.Once
 )
 
+// GetRedis initializes and returns a Redis client.
 func GetRedis() *redis.Client {
 	rdbOnce.Do(func() {
 		redisConfig := config.GetRedisConfig()

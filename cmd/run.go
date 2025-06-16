@@ -16,6 +16,7 @@ import (
 	"mliev.com/template/go-web/router"
 )
 
+// Start 启动应用程序
 func Start() {
 	initializeServices()
 	go RunHttp()
@@ -51,6 +52,7 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+// RunHttp 启动HTTP服务器并注册路由和中间件
 func RunHttp() {
 
 	// 设置Gin模式
