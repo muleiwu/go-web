@@ -11,11 +11,11 @@ func InitRouter(router *gin.Engine) {
 	//regexRouter := ginregex.New(router, nil)
 
 	// 健康检查接口
-	router.GET("/health", controller.GetHealth)
-	router.GET("/health/simple", controller.GetHealthSimple)
+	router.GET("/health", controller.HealthController{}.GetHealth)
+	router.GET("/health/simple", controller.HealthController{}.GetHealthSimple)
 
 	// 首页
-	router.GET("/", controller.GetIndex)
+	router.GET("/", controller.IndexController{}.GetIndex)
 
 	// API路由组
 	v1 := router.Group("/api/v1")
