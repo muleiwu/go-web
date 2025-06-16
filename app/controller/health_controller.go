@@ -2,11 +2,10 @@ package controller
 
 import (
 	"context"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"mliev.com/template/go-web/constants"
-	"mliev.com/template/go-web/support/db"
+	"mliev.com/template/go-web/helper"
+	"time"
 )
 
 // HealthStatus 健康状态结构
@@ -58,7 +57,7 @@ func GetHealthSimple(c *gin.Context) {
 
 // checkDatabase 检查数据库连接
 func checkDatabase() ServiceStatus {
-	database := db.GetDB()
+	database := helper.GetDB()
 	if database == nil {
 		return ServiceStatus{
 			Status:  "DOWN",
@@ -88,7 +87,7 @@ func checkDatabase() ServiceStatus {
 
 // checkRedis 检查Redis连接
 func checkRedis() ServiceStatus {
-	redis := db.GetRedis()
+	redis := helper.GetRedis()
 	if redis == nil {
 		return ServiceStatus{
 			Status:  "DOWN",

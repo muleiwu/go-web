@@ -3,30 +3,36 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"mliev.com/template/go-web/app/Middleware"
-	"mliev.com/template/go-web/config"
-	"mliev.com/template/go-web/router"
-	"mliev.com/template/go-web/support"
-	"mliev.com/template/go-web/support/db"
-	"mliev.com/template/go-web/support/logger"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"mliev.com/template/go-web/config"
+	"mliev.com/template/go-web/helper"
+	"mliev.com/template/go-web/router"
 )
 
 func Start() {
-	config.InitViper()
-	db.GetDB()
-	db.GetRedis()
+	initializeServices()
 	go RunHttp()
 	// 添加阻塞以保持主程序运行
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	<-c
+}
+
+// initializeServices 初始化所有服务
+func initializeServices() {
+	if err := helper.InitViper(); err != nil {
+		helper.Logger().Error(fmt.Sprintf("配置初始化失败: %v", err))
+		os.Exit(1)
+	}
+	helper.GetDB()
+	helper.GetRedis()
 }
 
 // zapLogWriter 实现io.Writer接口，将gin的日志输出重定向到zap
@@ -48,13 +54,13 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 func RunHttp() {
 
 	// 设置Gin模式
-	if support.Env("mode", "").(string) == "release" {
+	if helper.EnvString("mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// 完全替换gin的默认Logger
 	gin.DisableConsoleColor()
-	zapLogger := logger.Get()
+	zapLogger := helper.Logger()
 	gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
 	gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
 
@@ -71,13 +77,13 @@ func RunHttp() {
 			continue
 		}
 		engine.Use(handlerFunc)
-		logger.Get().Info(fmt.Sprintf("注册中间件: %d", i))
+		helper.Logger().Info(fmt.Sprintf("注册中间件: %d", i))
 	}
-	engine.Use(middleware.CorsMiddleware())
+
 	router.InitRouter(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := support.Env("addr", ":8080").(string)
+	addr := helper.EnvString("addr", ":8080")
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: engine,
@@ -89,15 +95,15 @@ func RunHttp() {
 
 	// 在单独的goroutine中启动服务器
 	go func() {
-		logger.Get().Info(fmt.Sprintf("服务器启动于 %s", addr))
+		helper.Logger().Info(fmt.Sprintf("服务器启动于 %s", addr))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Get().Error(fmt.Sprintf("启动服务器失败: %v", err))
+			helper.Logger().Error(fmt.Sprintf("启动服务器失败: %v", err))
 		}
 	}()
 
 	// 等待中断信号
 	<-quit
-	logger.Get().Info("正在关闭服务器...")
+	helper.Logger().Info("正在关闭服务器...")
 
 	// 创建一个5秒的上下文用于超时控制
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -105,10 +111,10 @@ func RunHttp() {
 
 	// 优雅地关闭服务器
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Get().Error(fmt.Sprintf("服务器强制关闭: %v", err))
+		helper.Logger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
 	}
 
-	logger.Get().Info("服务器已优雅关闭")
+	helper.Logger().Info("服务器已优雅关闭")
 }
 
 // GinZapLogger 返回一个Gin中间件，使用zap记录HTTP请求
@@ -122,41 +128,29 @@ func GinZapLogger() gin.HandlerFunc {
 
 		// 请求处理完成后记录日志
 		cost := time.Since(start)
-		zapLogger := logger.Get()
+		zapLogger := helper.Logger()
+		statusCode := c.Writer.Status()
+
+		// 通用的日志字段
+		fields := []zap.Field{
+			zap.String("method", c.Request.Method),
+			zap.String("path", path),
+			zap.String("query", query),
+			zap.Int("status", statusCode),
+			zap.String("ip", c.ClientIP()),
+			zap.Duration("latency", cost),
+			zap.String("user-agent", c.Request.UserAgent()),
+		}
 
 		// 根据状态码决定日志级别
-		statusCode := c.Writer.Status()
-		if statusCode >= 500 {
-			zapLogger.Error("请求处理",
-				zap.String("method", c.Request.Method),
-				zap.String("path", path),
-				zap.String("query", query),
-				zap.Int("status", statusCode),
-				zap.String("ip", c.ClientIP()),
-				zap.Duration("latency", cost),
-				zap.String("user-agent", c.Request.UserAgent()),
-				zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			)
-		} else if statusCode >= 400 {
-			zapLogger.Warn("请求处理",
-				zap.String("method", c.Request.Method),
-				zap.String("path", path),
-				zap.String("query", query),
-				zap.Int("status", statusCode),
-				zap.String("ip", c.ClientIP()),
-				zap.Duration("latency", cost),
-				zap.String("user-agent", c.Request.UserAgent()),
-			)
-		} else {
-			zapLogger.Info("请求处理",
-				zap.String("method", c.Request.Method),
-				zap.String("path", path),
-				zap.String("query", query),
-				zap.Int("status", statusCode),
-				zap.String("ip", c.ClientIP()),
-				zap.Duration("latency", cost),
-				zap.String("user-agent", c.Request.UserAgent()),
-			)
+		switch {
+		case statusCode >= 500:
+			fields = append(fields, zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()))
+			zapLogger.Error("请求处理", fields...)
+		case statusCode >= 400:
+			zapLogger.Warn("请求处理", fields...)
+		default:
+			zapLogger.Info("请求处理", fields...)
 		}
 	}
 }
