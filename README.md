@@ -37,7 +37,7 @@ go-web/
 │   └── middleware/         # 中间件
 ├── router/                 # 路由配置
 ├── config/                 # 配置管理
-├── support/                # 基础支持服务
+├── helper/                 # 基础支持服务
 │   ├── db/                 # 数据库连接
 │   └── logger/             # 日志配置
 ├── util/                   # 工具函数
