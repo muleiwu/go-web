@@ -1,6 +1,5 @@
 # 服务器配置
 server:
-  port: 8080
   mode: release  # debug, release, test
   addr: ":8080"
 
