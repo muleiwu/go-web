@@ -1,8 +1,8 @@
 package helper
 
 import (
+	"cnb.cool/mliev/examples/go-web/config"
 	"github.com/redis/go-redis/v9"
-	"mliev.com/template/go-web/config"
 	"sync"
 )
 

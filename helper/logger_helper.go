@@ -1,9 +1,8 @@
 package helper
 
 import (
-	"sync"
-
 	"go.uber.org/zap"
+	"sync"
 )
 
 var (

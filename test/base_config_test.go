@@ -1,7 +1,7 @@
 package test
 
 import (
-	"mliev.com/template/go-web/config"
+	"cnb.cool/mliev/examples/go-web/config"
 	"sync"
 	"testing"
 )
