@@ -1,8 +1,8 @@
 package router
 
 import (
+	"cnb.cool/mliev/examples/go-web/app/controller"
 	"github.com/gin-gonic/gin"
-	"mliev.com/template/go-web/app/controller"
 )
 
 // InitRouter 初始化路由 路由目录 /api/、/sapi/、/v1/、/v2/

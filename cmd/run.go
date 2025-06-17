@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"cnb.cool/mliev/examples/go-web/config"
+	"cnb.cool/mliev/examples/go-web/helper"
+	"cnb.cool/mliev/examples/go-web/router"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"mliev.com/template/go-web/config"
-	"mliev.com/template/go-web/helper"
-	"mliev.com/template/go-web/router"
 )
 
 // Start 启动应用程序
