@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
+	"cnb.cool/mliev/examples/go-web/app/dto"
+	"cnb.cool/mliev/examples/go-web/constants"
+	"cnb.cool/mliev/examples/go-web/helper"
 	"github.com/gin-gonic/gin"
-	"mliev.com/template/go-web/app/dto"
-	"mliev.com/template/go-web/constants"
-	"mliev.com/template/go-web/helper"
 )
 
 type HealthController struct {

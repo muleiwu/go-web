@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-
 	"github.com/redis/go-redis/v9"
 )
 

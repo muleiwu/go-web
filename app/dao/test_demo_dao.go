@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"mliev.com/template/go-web/app/model"
-	"mliev.com/template/go-web/helper"
+	"cnb.cool/mliev/examples/go-web/app/model"
+	"cnb.cool/mliev/examples/go-web/helper"
 )
 
 func GetUserByUsername(username string) (*model.TestDemo, error) {

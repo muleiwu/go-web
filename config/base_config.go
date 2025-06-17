@@ -2,11 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/spf13/viper"
 )
 
 // Config 高性能配置管理器

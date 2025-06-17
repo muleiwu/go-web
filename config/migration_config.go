@@ -1,6 +1,6 @@
 package config
 
-import "mliev.com/template/go-web/app/model"
+import "cnb.cool/mliev/examples/go-web/app/model"
 
 type MigrationConfig struct {
 	// 是否启用自动迁移
