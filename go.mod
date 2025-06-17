@@ -1,4 +1,4 @@
-module mliev.com/template/go-web
+module cnb.cool/mliev/examples/go-web
 
 go 1.23.2
 

@@ -1,11 +1,11 @@
 package helper
 
 import (
+	"cnb.cool/mliev/examples/go-web/config"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"mliev.com/template/go-web/config"
 	"sync"
 )
 

@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"cnb.cool/mliev/examples/go-web/app/dto"
+	"cnb.cool/mliev/examples/go-web/constants"
 	"github.com/gin-gonic/gin"
-	"mliev.com/template/go-web/app/dto"
-	"mliev.com/template/go-web/constants"
 	"net/http"
 )
 
