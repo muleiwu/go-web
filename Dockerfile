@@ -12,7 +12,7 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
 # 设置Go环境变量
-ENV GOPROXY=https://goproxy.cn,direct
+#ENV GOPROXY=https://goproxy.cn,direct
 ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 ENV GOOS=linux
@@ -28,7 +28,7 @@ RUN go mod download
 COPY . .
 
 # 构建应用
-RUN go build -ldflags="-s -w" -o dwz-server main.go
+RUN go build -ldflags="-s -w" -o go-web main.go
 
 # 运行阶段
 FROM alpine:latest
@@ -48,10 +48,11 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
 WORKDIR /app
 
 # 从构建阶段复制二进制文件
-COPY --from=builder /app/dwz-server .
+COPY --from=builder /app/go-web .
 
 # 创建日志目录
 RUN mkdir -p logs && \
+    mkdir -p config && \
     chown -R appuser:appgroup /app
 
 # 切换到非root用户
@@ -65,4 +66,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health/simple || exit 1
 
 # 启动应用
-CMD ["./dwz-server"] 
+CMD ["./go-web"]
