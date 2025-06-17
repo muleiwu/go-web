@@ -1,8 +1,8 @@
 package config
 
 import (
+	"cnb.cool/mliev/examples/go-web/app/middleware"
 	"github.com/gin-gonic/gin"
-	"mliev.com/template/go-web/app/middleware"
 )
 
 type MiddlewareConfig struct {

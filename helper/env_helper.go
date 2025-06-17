@@ -1,9 +1,8 @@
 package helper
 
 import (
+	"cnb.cool/mliev/examples/go-web/config"
 	"log"
-
-	"mliev.com/template/go-web/config"
 )
 
 // InitViper 初始化配置
