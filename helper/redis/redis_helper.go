@@ -1,4 +1,4 @@
-package helper
+package redis
 
 import (
 	"cnb.cool/mliev/examples/go-web/config"

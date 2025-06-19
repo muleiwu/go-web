@@ -1,4 +1,4 @@
-package helper
+package env
 
 import (
 	"cnb.cool/mliev/examples/go-web/config"
