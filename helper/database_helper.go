@@ -38,18 +38,22 @@ func initDB() {
 		return
 	}
 
+}
+
+func AutoMigrate() error {
 	// Auto migrate the database schema using migration config
 	migrationConfig := config.MigrationConfig{}
 	migrationModels := migrationConfig.Get()
 
 	if len(migrationModels) > 0 {
-		err = db.AutoMigrate(migrationModels...)
+		err := GetDB().AutoMigrate(migrationModels...)
 		if err != nil {
-			Logger().Error(fmt.Sprintf("[db migration err:%s]", err.Error()))
-		} else {
-			Logger().Info(fmt.Sprintf("[db migration success: %d models migrated]", len(migrationModels)))
+			return fmt.Errorf("[db migration err:%s]", err.Error())
 		}
+
+		Logger().Info(fmt.Sprintf("[db migration success: %d models migrated]", len(migrationModels)))
 	}
+	return nil
 }
 
 // Database returns the singleton database instance
