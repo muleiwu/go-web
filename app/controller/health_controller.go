@@ -1,12 +1,13 @@
 package controller
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper/database"
+	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
-	"cnb.cool/mliev/examples/go-web/helper"
 	"github.com/gin-gonic/gin"
 )
 
@@ -53,7 +54,7 @@ func (receiver HealthController) GetHealthSimple(c *gin.Context) {
 
 // checkDatabase 检查数据库连接
 func (receiver HealthController) checkDatabase() dto.ServiceStatus {
-	database := helper.GetDB()
+	database := database.GetDB()
 	if database == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
@@ -83,7 +84,7 @@ func (receiver HealthController) checkDatabase() dto.ServiceStatus {
 
 // checkRedis 检查Redis连接
 func (receiver HealthController) checkRedis() dto.ServiceStatus {
-	redis := helper.GetRedis()
+	redis := redis.GetRedis()
 	if redis == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
