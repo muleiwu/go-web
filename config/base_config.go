@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -29,7 +28,6 @@ func InitViper() error {
 
 		// 支持读取环境变量
 		viper.AutomaticEnv()
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 		// 尝试读取配置文件
 		if err := viper.ReadInConfig(); err != nil {
