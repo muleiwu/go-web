@@ -2,17 +2,7 @@ package helper
 
 import (
 	"cnb.cool/mliev/examples/go-web/config"
-	"log"
 )
-
-// InitViper 初始化配置
-func InitViper() error {
-	if err := config.InitViper(); err != nil {
-		log.Printf("配置初始化失败: %v", err)
-		return err
-	}
-	return nil
-}
 
 // Env 获取环境变量
 func Env(name string, def any) any {
