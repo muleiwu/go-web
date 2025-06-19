@@ -1,7 +1,8 @@
-package helper
+package database
 
 import (
 	"cnb.cool/mliev/examples/go-web/config"
+	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -34,7 +35,7 @@ func initDB() {
 	db, err = gorm.Open(driver, &gorm.Config{})
 
 	if err != nil {
-		Logger().Error(fmt.Sprintf("[db connect err:%s]", err.Error()))
+		logger.Logger().Error(fmt.Sprintf("[db connect err:%s]", err.Error()))
 		return
 	}
 
@@ -51,7 +52,7 @@ func AutoMigrate() error {
 			return fmt.Errorf("[db migration err:%s]", err.Error())
 		}
 
-		Logger().Info(fmt.Sprintf("[db migration success: %d models migrated]", len(migrationModels)))
+		logger.Logger().Info(fmt.Sprintf("[db migration success: %d models migrated]", len(migrationModels)))
 	}
 	return nil
 }
