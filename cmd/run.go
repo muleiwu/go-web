@@ -38,9 +38,9 @@ func initializeServices() {
 	// 自动迁移数据库表结构
 	err := helper.AutoMigrate()
 	haltOnMigrationFailure := helper.EnvBool("halt_on_migration_failure", true)
+	helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 
 	if haltOnMigrationFailure && err != nil {
-		helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 		os.Exit(1)
 	}
 
