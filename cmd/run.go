@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper/database"
+	"cnb.cool/mliev/examples/go-web/helper/env"
+	"cnb.cool/mliev/examples/go-web/helper/logger"
+	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
 	"fmt"
 	"net/http"
@@ -10,7 +14,6 @@ import (
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/config"
-	"cnb.cool/mliev/examples/go-web/helper"
 	"cnb.cool/mliev/examples/go-web/router"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -29,18 +32,18 @@ func Start() {
 // initializeServices 初始化所有服务
 func initializeServices() {
 
-	helper.GetDB()
+	database.GetDB()
 
 	// 自动迁移数据库表结构
-	err := helper.AutoMigrate()
-	haltOnMigrationFailure := helper.EnvBool("database.halt_on_migration_failure", true)
-	helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
+	err := database.AutoMigrate()
+	haltOnMigrationFailure := env.EnvBool("database.halt_on_migration_failure", true)
+	logger.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 
 	if haltOnMigrationFailure && err != nil {
 		os.Exit(1)
 	}
 
-	helper.GetRedis()
+	redis.GetRedis()
 }
 
 // zapLogWriter 实现io.Writer接口，将gin的日志输出重定向到zap
@@ -63,13 +66,13 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 func RunHttp() {
 
 	// 设置Gin模式
-	if helper.EnvString("mode", "") == "release" {
+	if env.EnvString("mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// 完全替换gin的默认Logger
 	gin.DisableConsoleColor()
-	zapLogger := helper.Logger()
+	zapLogger := logger.Logger()
 	gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
 	gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
 
@@ -86,13 +89,13 @@ func RunHttp() {
 			continue
 		}
 		engine.Use(handlerFunc)
-		helper.Logger().Info(fmt.Sprintf("注册中间件: %d", i))
+		logger.Logger().Info(fmt.Sprintf("注册中间件: %d", i))
 	}
 
 	router.InitRouter(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := helper.EnvString("addr", ":8080")
+	addr := env.EnvString("addr", ":8080")
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: engine,
@@ -104,15 +107,15 @@ func RunHttp() {
 
 	// 在单独的goroutine中启动服务器
 	go func() {
-		helper.Logger().Info(fmt.Sprintf("服务器启动于 %s", addr))
+		logger.Logger().Info(fmt.Sprintf("服务器启动于 %s", addr))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			helper.Logger().Error(fmt.Sprintf("启动服务器失败: %v", err))
+			logger.Logger().Error(fmt.Sprintf("启动服务器失败: %v", err))
 		}
 	}()
 
 	// 等待中断信号
 	<-quit
-	helper.Logger().Info("正在关闭服务器...")
+	logger.Logger().Info("正在关闭服务器...")
 
 	// 创建一个5秒的上下文用于超时控制
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -120,10 +123,10 @@ func RunHttp() {
 
 	// 优雅地关闭服务器
 	if err := srv.Shutdown(ctx); err != nil {
-		helper.Logger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
+		logger.Logger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
 	}
 
-	helper.Logger().Info("服务器已优雅关闭")
+	logger.Logger().Info("服务器已优雅关闭")
 }
 
 // GinZapLogger 返回一个Gin中间件，使用zap记录HTTP请求
@@ -137,7 +140,7 @@ func GinZapLogger() gin.HandlerFunc {
 
 		// 请求处理完成后记录日志
 		cost := time.Since(start)
-		zapLogger := helper.Logger()
+		zapLogger := logger.Logger()
 		statusCode := c.Writer.Status()
 
 		// 通用的日志字段
