@@ -28,11 +28,18 @@ func Start() {
 
 // initializeServices 初始化所有服务
 func initializeServices() {
-	if err := helper.InitViper(); err != nil {
-		helper.Logger().Error(fmt.Sprintf("配置初始化失败: %v", err))
+
+	helper.GetDB()
+
+	// 自动迁移数据库表结构
+	err := helper.AutoMigrate()
+	haltOnMigrationFailure := helper.EnvBool("database.halt_on_migration_failure", true)
+	helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
+
+	if haltOnMigrationFailure && err != nil {
 		os.Exit(1)
 	}
-	helper.GetDB()
+
 	helper.GetRedis()
 }
 
