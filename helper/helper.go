@@ -9,10 +9,10 @@ import (
 type Helper struct {
 }
 
-func (receiver Helper) Env() interfaces.EnvInterface {
+func Env() interfaces.EnvInterface {
 	return env.EnvHelper
 }
 
-func (receiver Helper) Logger() interfaces.LoggerInterface {
+func Logger() interfaces.LoggerInterface {
 	return logger.LoggerHelper
 }

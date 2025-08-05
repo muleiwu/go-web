@@ -15,10 +15,10 @@ type RedisConfig struct {
 
 func GetRedisConfig() RedisConfig {
 	return RedisConfig{
-		Host:     (helper.Helper{}.Env()).GetString("redis.host", "localhost"),
-		Port:     (helper.Helper{}.Env()).GetInt("redis.port", 6379),
-		Password: (helper.Helper{}.Env()).GetString("redis.password", ""),
-		DB:       (helper.Helper{}.Env()).GetInt("redis.db", 0),
+		Host:     helper.Env().GetString("redis.host", "localhost"),
+		Port:     helper.Env().GetInt("redis.port", 6379),
+		Password: helper.Env().GetString("redis.password", ""),
+		DB:       helper.Env().GetInt("redis.db", 0),
 	}
 }
 
