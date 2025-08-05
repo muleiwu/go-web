@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper"
 	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/env"
 	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
@@ -36,7 +36,7 @@ func initializeServices() {
 
 	// 自动迁移数据库表结构
 	err := database.AutoMigrate()
-	haltOnMigrationFailure := env.EnvBool("database.halt_on_migration_failure", true)
+	haltOnMigrationFailure := helper.Helper{}.Env().GetBool("database.halt_on_migration_failure", true)
 	logger.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 
 	if haltOnMigrationFailure && err != nil {
@@ -66,7 +66,7 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 func RunHttp() {
 
 	// 设置Gin模式
-	if env.EnvString("mode", "") == "release" {
+	if (helper.Helper{}.Env()).GetString("mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -95,7 +95,7 @@ func RunHttp() {
 	router.InitRouter(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := env.EnvString("addr", ":8080")
+	addr := (helper.Helper{}.Env()).GetString("addr", ":8080")
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: engine,

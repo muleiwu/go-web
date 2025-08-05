@@ -1,6 +1,7 @@
 package config
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper"
 	"fmt"
 )
 
@@ -15,12 +16,12 @@ type DatabaseConfig struct {
 
 func GetDatabaseConfig() DatabaseConfig {
 	return DatabaseConfig{
-		Driver:   GetString("db.driver", "postgresql"),
-		Host:     GetString("db.host", "127.0.0.1"),
-		Port:     GetInt("db.port", 5432),
-		DBName:   GetString("db.dbname", "test"),
-		Username: GetString("db.username", "test"),
-		Password: GetString("db.password", "123456"),
+		Driver:   (helper.Helper{}.Env()).GetString("db.driver", "postgresql"),
+		Host:     (helper.Helper{}.Env()).GetString("db.host", "127.0.0.1"),
+		Port:     (helper.Helper{}.Env()).GetInt("db.port", 5432),
+		DBName:   (helper.Helper{}.Env()).GetString("db.dbname", "test"),
+		Username: (helper.Helper{}.Env()).GetString("db.username", "test"),
+		Password: (helper.Helper{}.Env()).GetString("db.password", "123456"),
 	}
 }
 
