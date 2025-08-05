@@ -9,12 +9,10 @@ import (
 	"syscall"
 	"time"
 
+	"cnb.cool/mliev/examples/go-web/config"
 	"cnb.cool/mliev/examples/go-web/helper"
 	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"cnb.cool/mliev/examples/go-web/helper/redis"
-
-	"cnb.cool/mliev/examples/go-web/config"
 	"cnb.cool/mliev/examples/go-web/router"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -84,7 +82,7 @@ func RunHttp() {
 	// 配置Gin引擎并替换默认logger
 	engine := gin.New()
 	engine.Use(gin.Recovery())
-	engine.Use(GinZapLogger())
+	//engine.Use(GinZapLogger())
 
 	// 注册中间件
 	handlerFuncs := config.MiddlewareConfig{}.Get()
@@ -99,7 +97,7 @@ func RunHttp() {
 	router.InitRouter(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := (helper.Helper{}.Env()).GetString("addr", ":8080")
+	addr := helper.Env().GetString("addr", ":8080")
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: engine,
@@ -134,39 +132,39 @@ func RunHttp() {
 }
 
 // GinZapLogger 返回一个Gin中间件，使用zap记录HTTP请求
-func GinZapLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
-
-		c.Next()
-
-		// 请求处理完成后记录日志
-		cost := time.Since(start)
-		zapLogger := helper.Logger()
-		statusCode := c.Writer.Status()
-
-		// 通用的日志字段
-		fields := []zap.Field{
-			zap.String("method", c.Request.Method),
-			zap.String("path", path),
-			zap.String("query", query),
-			zap.Int("status", statusCode),
-			zap.String("ip", c.ClientIP()),
-			zap.Duration("latency", cost),
-			zap.String("user-agent", c.Request.UserAgent()),
-		}
-
-		// 根据状态码决定日志级别
-		switch {
-		case statusCode >= 500:
-			fields = append(fields, zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()))
-			zapLogger.Error("请求处理", fields...)
-		case statusCode >= 400:
-			zapLogger.Warn("请求处理", fields...)
-		default:
-			zapLogger.Info("请求处理", fields...)
-		}
-	}
-}
+//func GinZapLogger() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		start := time.Now()
+//		path := c.Request.URL.Path
+//		query := c.Request.URL.RawQuery
+//
+//		c.Next()
+//
+//		// 请求处理完成后记录日志
+//		cost := time.Since(start)
+//		zapLogger := helper.Logger()
+//		statusCode := c.Writer.Status()
+//
+//		// 通用的日志字段
+//		fields := []zap.Field{
+//			zap.String("method", c.Request.Method),
+//			zap.String("path", path),
+//			zap.String("query", query),
+//			zap.Int("status", statusCode),
+//			zap.String("ip", c.ClientIP()),
+//			zap.Duration("latency", cost),
+//			zap.String("user-agent", c.Request.UserAgent()),
+//		}
+//
+//		// 根据状态码决定日志级别
+//		switch {
+//		case statusCode >= 500:
+//			fields = append(fields, zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()))
+//			zapLogger.Error("请求处理", fields...)
+//		case statusCode >= 400:
+//			zapLogger.Warn("请求处理", fields...)
+//		default:
+//			zapLogger.Info("请求处理", fields...)
+//		}
+//	}
+//}
