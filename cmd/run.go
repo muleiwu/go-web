@@ -41,8 +41,8 @@ func initializeServices() {
 
 	// 自动迁移数据库表结构
 	err := database.AutoMigrate()
-	haltOnMigrationFailure := helper.Helper{}.Env().GetBool("database.halt_on_migration_failure", true)
-	logger.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
+	haltOnMigrationFailure := helper.Env().GetBool("database.halt_on_migration_failure", true)
+	helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 
 	if haltOnMigrationFailure && err != nil {
 		os.Exit(1)
@@ -70,13 +70,13 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 // RunHttp 启动HTTP服务器并注册路由和中间件
 func RunHttp() {
 	// 设置Gin模式
-	if (helper.Helper{}.Env()).GetString("mode", "") == "release" {
+	if helper.Env().GetString("mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// 完全替换gin的默认Logger
 	gin.DisableConsoleColor()
-	zapLogger := logger.Logger()
+	zapLogger := helper.Logger()
 	gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
 	gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
 
@@ -93,7 +93,7 @@ func RunHttp() {
 			continue
 		}
 		engine.Use(handlerFunc)
-		logger.Logger().Info(fmt.Sprintf("注册中间件: %d", i))
+		helper.Logger().Info(fmt.Sprintf("注册中间件: %d", i))
 	}
 
 	router.InitRouter(engine)
@@ -111,15 +111,15 @@ func RunHttp() {
 
 	// 在单独的goroutine中启动服务器
 	go func() {
-		logger.Logger().Info(fmt.Sprintf("服务器启动于 %s", addr))
+		helper.Logger().Info(fmt.Sprintf("服务器启动于 %s", addr))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Logger().Error(fmt.Sprintf("启动服务器失败: %v", err))
+			helper.Logger().Error(fmt.Sprintf("启动服务器失败: %v", err))
 		}
 	}()
 
 	// 等待中断信号
 	<-quit
-	logger.Logger().Info("正在关闭服务器...")
+	helper.Logger().Info("正在关闭服务器...")
 
 	// 创建一个5秒的上下文用于超时控制
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -127,10 +127,10 @@ func RunHttp() {
 
 	// 优雅地关闭服务器
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Logger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
+		helper.Logger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
 	}
 
-	logger.Logger().Info("服务器已优雅关闭")
+	helper.Logger().Info("服务器已优雅关闭")
 }
 
 // GinZapLogger 返回一个Gin中间件，使用zap记录HTTP请求
@@ -144,7 +144,7 @@ func GinZapLogger() gin.HandlerFunc {
 
 		// 请求处理完成后记录日志
 		cost := time.Since(start)
-		zapLogger := logger.Logger()
+		zapLogger := helper.Logger()
 		statusCode := c.Writer.Status()
 
 		// 通用的日志字段

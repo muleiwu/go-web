@@ -16,12 +16,12 @@ type DatabaseConfig struct {
 
 func GetDatabaseConfig() DatabaseConfig {
 	return DatabaseConfig{
-		Driver:   (helper.Helper{}.Env()).GetString("db.driver", "postgresql"),
-		Host:     (helper.Helper{}.Env()).GetString("db.host", "127.0.0.1"),
-		Port:     (helper.Helper{}.Env()).GetInt("db.port", 5432),
-		DBName:   (helper.Helper{}.Env()).GetString("db.dbname", "test"),
-		Username: (helper.Helper{}.Env()).GetString("db.username", "test"),
-		Password: (helper.Helper{}.Env()).GetString("db.password", "123456"),
+		Driver:   helper.Env().GetString("db.driver", "postgresql"),
+		Host:     helper.Env().GetString("db.host", "127.0.0.1"),
+		Port:     helper.Env().GetInt("db.port", 5432),
+		DBName:   helper.Env().GetString("db.dbname", "test"),
+		Username: helper.Env().GetString("db.username", "test"),
+		Password: helper.Env().GetString("db.password", "123456"),
 	}
 }
 
