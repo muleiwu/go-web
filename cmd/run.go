@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"cnb.cool/mliev/examples/go-web/helper"
-	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/logger"
-	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
 	"fmt"
 	"net/http"
@@ -12,6 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"cnb.cool/mliev/examples/go-web/helper"
+	"cnb.cool/mliev/examples/go-web/helper/database"
+	"cnb.cool/mliev/examples/go-web/helper/logger"
+	"cnb.cool/mliev/examples/go-web/helper/redis"
 
 	"cnb.cool/mliev/examples/go-web/config"
 	"cnb.cool/mliev/examples/go-web/router"
@@ -31,6 +32,10 @@ func Start() {
 
 // initializeServices 初始化所有服务
 func initializeServices() {
+
+	for _, assemblyInterface := range (config.AssemblyConfig{}).Get() {
+		assemblyInterface.Assembly()
+	}
 
 	database.GetDB()
 
@@ -64,7 +69,6 @@ func (z *zapLogWriter) Write(p []byte) (n int, err error) {
 
 // RunHttp 启动HTTP服务器并注册路由和中间件
 func RunHttp() {
-
 	// 设置Gin模式
 	if (helper.Helper{}.Env()).GetString("mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
