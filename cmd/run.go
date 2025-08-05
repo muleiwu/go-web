@@ -74,9 +74,9 @@ func RunHttp() {
 
 	// 完全替换gin的默认Logger
 	gin.DisableConsoleColor()
-	zapLogger := helper.Logger()
-	gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
-	gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
+	//zapLogger := helper.Logger()
+	//gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
+	//gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
 
 	// 配置Gin引擎
 	// 配置Gin引擎并替换默认logger
