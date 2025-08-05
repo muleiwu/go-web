@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"go.uber.org/zap"
 	"sync"
 )
+
+var LoggerHelper interfaces.LoggerInterface
 
 var (
 	logger     *zap.Logger
