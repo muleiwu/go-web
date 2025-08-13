@@ -1,6 +1,8 @@
 package assembly
 
 import (
+	"sync"
+
 	"cnb.cool/mliev/examples/go-web/helper/env"
 	"cnb.cool/mliev/examples/go-web/internal/impl"
 )
@@ -8,6 +10,12 @@ import (
 type Env struct {
 }
 
+var (
+	envOnce sync.Once
+)
+
 func (receiver Env) Assembly() {
-	env.EnvHelper = impl.NewEnv()
+	envOnce.Do(func() {
+		env.EnvHelper = impl.NewEnv()
+	})
 }
