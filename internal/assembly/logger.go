@@ -1,6 +1,8 @@
 package assembly
 
 import (
+	"sync"
+
 	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"cnb.cool/mliev/examples/go-web/internal/impl"
 )
@@ -8,6 +10,12 @@ import (
 type Logger struct {
 }
 
+var (
+	loggerOnce sync.Once
+)
+
 func (receiver Logger) Assembly() {
-	logger.LoggerHelper = impl.NewLogger()
+	loggerOnce.Do(func() {
+		logger.LoggerHelper = impl.NewLogger()
+	})
 }
