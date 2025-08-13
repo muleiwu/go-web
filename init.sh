@@ -23,8 +23,8 @@ if git remote -v >/dev/null 2>&1; then
             # SSH格式: git@github.com:user/repo.git -> github.com/user/repo
             NEW_MODULE_PATH=$(echo "$REMOTE_URL" | sed -E 's/git@([^:]+):/\1\//' | sed 's/\.git$//')
         elif [[ "$REMOTE_URL" == https://* ]]; then
-            # HTTPS格式: https://github.com/user/repo.git -> github.com/user/repo
-            NEW_MODULE_PATH=$(echo "$REMOTE_URL" | sed -E 's/https:\/\/([^\/]+)\/(.+)\.git$/\1\/\2/')
+            # HTTPS格式: https://github.com/user/repo(.git) -> github.com/user/repo
+            NEW_MODULE_PATH=$(echo "$REMOTE_URL" | sed -E 's/https:\/\/([^\/]+)\/(.+)/\1\/\2/' | sed 's/\.git$//')
         else
             # 其他格式，尝试直接使用
             NEW_MODULE_PATH=$(echo "$REMOTE_URL" | sed 's/\.git$//')
