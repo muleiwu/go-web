@@ -12,5 +12,6 @@ func (receiver AssemblyConfig) Get() []interfaces.AssemblyInterface {
 	return []interfaces.AssemblyInterface{
 		assembly.Env{},
 		assembly.Logger{},
+		assembly.Redis{},
 	}
 }
