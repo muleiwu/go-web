@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper/database"
 	"cnb.cool/mliev/examples/go-web/helper/env"
 	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"cnb.cool/mliev/examples/go-web/helper/redis"
@@ -20,4 +21,8 @@ func Logger() interfaces.LoggerInterface {
 
 func Redis() interfaces.RedisInterface {
 	return redis.RedisHelper
+}
+
+func Database() interfaces.DatabaseInterface {
+	return database.DatabaseHelper
 }
