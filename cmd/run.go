@@ -12,7 +12,6 @@ import (
 	"cnb.cool/mliev/examples/go-web/config"
 	"cnb.cool/mliev/examples/go-web/helper"
 	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"cnb.cool/mliev/examples/go-web/router"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -45,8 +44,6 @@ func initializeServices() {
 	if haltOnMigrationFailure && err != nil {
 		os.Exit(1)
 	}
-
-	redis.GetRedis()
 }
 
 // zapLogWriter 实现io.Writer接口，将gin的日志输出重定向到zap

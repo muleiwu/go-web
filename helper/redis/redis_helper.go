@@ -1,22 +1,7 @@
 package redis
 
 import (
-	"cnb.cool/mliev/examples/go-web/config"
-	"github.com/redis/go-redis/v9"
-	"sync"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 )
 
-var (
-	rdb     *redis.Client
-	rdbOnce sync.Once
-)
-
-// GetRedis initializes and returns a Redis client.
-func GetRedis() *redis.Client {
-	rdbOnce.Do(func() {
-		redisConfig := config.GetRedisConfig()
-		rdb = redis.NewClient(redisConfig.GetOptions())
-	})
-
-	return rdb
-}
+var RedisHelper interfaces.RedisInterface

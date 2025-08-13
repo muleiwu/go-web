@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
 	"time"
+
+	"cnb.cool/mliev/examples/go-web/helper"
+	"cnb.cool/mliev/examples/go-web/helper/database"
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
@@ -84,16 +85,15 @@ func (receiver HealthController) checkDatabase() dto.ServiceStatus {
 
 // checkRedis 检查Redis连接
 func (receiver HealthController) checkRedis() dto.ServiceStatus {
-	redis := redis.GetRedis()
-	if redis == nil {
+	redisHelper := helper.Redis()
+	if redisHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "Redis连接失败",
 		}
 	}
-
 	ctx := context.Background()
-	if err := redis.Ping(ctx).Err(); err != nil {
+	if err := redisHelper.Ping(ctx); err != nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "Redis ping失败: " + err.Error(),

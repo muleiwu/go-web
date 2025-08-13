@@ -3,6 +3,7 @@ package helper
 import (
 	"cnb.cool/mliev/examples/go-web/helper/env"
 	"cnb.cool/mliev/examples/go-web/helper/logger"
+	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 )
 
@@ -15,4 +16,8 @@ func Env() interfaces.EnvInterface {
 
 func Logger() interfaces.LoggerInterface {
 	return logger.LoggerHelper
+}
+
+func Redis() interfaces.RedisInterface {
+	return redis.RedisHelper
 }
