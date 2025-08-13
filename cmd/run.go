@@ -11,7 +11,7 @@ import (
 
 	"cnb.cool/mliev/examples/go-web/config"
 	"cnb.cool/mliev/examples/go-web/helper"
-	"cnb.cool/mliev/examples/go-web/helper/database"
+	"cnb.cool/mliev/examples/go-web/helper/migration"
 	"cnb.cool/mliev/examples/go-web/router"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -34,10 +34,8 @@ func initializeServices() {
 		assemblyInterface.Assembly()
 	}
 
-	database.GetDB()
-
 	// 自动迁移数据库表结构
-	err := database.AutoMigrate()
+	err := migration.AutoMigrate()
 	haltOnMigrationFailure := helper.Env().GetBool("database.halt_on_migration_failure", true)
 	helper.Logger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
 

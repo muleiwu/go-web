@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/helper"
-	"cnb.cool/mliev/examples/go-web/helper/database"
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
@@ -55,19 +54,27 @@ func (receiver HealthController) GetHealthSimple(c *gin.Context) {
 
 // checkDatabase 检查数据库连接
 func (receiver HealthController) checkDatabase() dto.ServiceStatus {
-	database := database.GetDB()
-	if database == nil {
+	databaseHelper := helper.Database()
+	if databaseHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "数据库连接失败",
 		}
 	}
 
-	sqlDB, err := database.DB()
+	gormDB := databaseHelper.GetDB()
+	if gormDB == nil {
+		return dto.ServiceStatus{
+			Status:  "DOWN",
+			Message: "获取数据库连接失败",
+		}
+	}
+
+	sqlDB, err := gormDB.DB()
 	if err != nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
-			Message: "获取数据库连接失败: " + err.Error(),
+			Message: "获取底层数据库连接失败: " + err.Error(),
 		}
 	}
 
