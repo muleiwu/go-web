@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"cnb.cool/mliev/examples/go-web/config"
-	"cnb.cool/mliev/examples/go-web/helper/migration"
 	helper2 "cnb.cool/mliev/examples/go-web/internal/helper"
 )
 
@@ -25,17 +23,20 @@ func initializeServices() {
 
 	helper := helper2.NewHelper()
 
-	assembly := config.NewAssembly(helper)
+	assembly := config.Assembly{
+		Helper: helper,
+	}
 	for _, assemblyInterface := range assembly.Get() {
 		assemblyInterface.Assembly()
 	}
 
-	// 自动迁移数据库表结构
-	err := migration.AutoMigrate(helper)
-	haltOnMigrationFailure := helper.GetEnv().GetBool("database.halt_on_migration_failure", true)
-
-	if haltOnMigrationFailure && err != nil {
-		helper.GetLogger().Error(fmt.Sprintf("数据库迁移失败: %v", err))
-		panic(err)
+	server := config.Server{
+		Helper: helper,
+	}
+	for _, serverInterface := range server.Get() {
+		err := serverInterface.Run()
+		if err != nil {
+			helper.GetLogger().Error(err.Error())
+		}
 	}
 }
