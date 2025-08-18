@@ -2,11 +2,12 @@ package impl
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Env struct {

@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/internal/impl"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/database/impl"
 )
 
 type Database struct {

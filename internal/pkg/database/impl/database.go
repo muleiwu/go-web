@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"cnb.cool/mliev/examples/go-web/helper/env"
-	"cnb.cool/mliev/examples/go-web/internal/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

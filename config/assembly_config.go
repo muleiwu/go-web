@@ -1,8 +1,11 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/internal/assembly"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
+	database "cnb.cool/mliev/examples/go-web/internal/pkg/database/assembly"
+	env "cnb.cool/mliev/examples/go-web/internal/pkg/env/assembly"
+	logger "cnb.cool/mliev/examples/go-web/internal/pkg/logger/assembly"
+	redis "cnb.cool/mliev/examples/go-web/internal/pkg/redis/assembly"
 )
 
 type AssemblyConfig struct {
@@ -10,9 +13,9 @@ type AssemblyConfig struct {
 
 func (receiver AssemblyConfig) Get() []interfaces.AssemblyInterface {
 	return []interfaces.AssemblyInterface{
-		assembly.Env{},
-		assembly.Logger{},
-		assembly.Database{},
-		assembly.Redis{},
+		env.Env{},
+		logger.Logger{},
+		database.Database{},
+		redis.Redis{},
 	}
 }
