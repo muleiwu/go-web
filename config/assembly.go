@@ -21,9 +21,12 @@ func (receiver *Assembly) Get() []interfaces.AssemblyInterface {
 
 	return []interfaces.AssemblyInterface{
 		&envAssembly.Env{Helper: receiver.Helper}, // 环境变量
-		&configAssembly.Config{Helper: receiver.Helper, DefaultConfigs: []configInterface.InitConfig{autoload.Base{}}}, // 代码中的配置(可使用环境变量)
-		&loggerAssembly.Logger{Helper: receiver.Helper},                                                                // 日志驱动
-		&databaseAssembly.Database{Helper: receiver.Helper},                                                            // 数据库配置
-		&redisAssembly.Redis{Helper: receiver.Helper},                                                                  // redis 配置
+		&configAssembly.Config{ // 代码中的配置(可使用环境变量)
+			Helper:         receiver.Helper,                               // 注入
+			DefaultConfigs: []configInterface.InitConfig{autoload.Base{}}, //注入默认配置
+		},
+		&loggerAssembly.Logger{Helper: receiver.Helper},     // 日志驱动
+		&databaseAssembly.Database{Helper: receiver.Helper}, // 数据库配置
+		&redisAssembly.Redis{Helper: receiver.Helper},       // redis 配置
 	}
 }
