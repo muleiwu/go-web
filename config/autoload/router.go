@@ -1,4 +1,4 @@
-package router
+package autoload
 
 import (
 	"cnb.cool/mliev/examples/go-web/app/controller"
