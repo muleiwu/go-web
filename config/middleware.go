@@ -5,10 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MiddlewareConfig struct {
+type Middleware struct {
 }
 
-func (m MiddlewareConfig) Get() []gin.HandlerFunc {
+func (m Middleware) Get() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.CorsMiddleware(),
 	}

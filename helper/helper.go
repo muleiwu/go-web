@@ -1,31 +1,37 @@
 package helper
 
 import (
+	"cnb.cool/mliev/examples/go-web/helper/config"
 	"cnb.cool/mliev/examples/go-web/helper/database"
 	"cnb.cool/mliev/examples/go-web/helper/env"
 	"cnb.cool/mliev/examples/go-web/helper/logger"
 	"cnb.cool/mliev/examples/go-web/helper/redis"
-	interfaces2 "cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
-	interfaces3 "cnb.cool/mliev/examples/go-web/internal/pkg/env/interfaces"
-	interfaces4 "cnb.cool/mliev/examples/go-web/internal/pkg/logger/interfaces"
-	"cnb.cool/mliev/examples/go-web/internal/pkg/redis/interfaces"
+	configInterface "cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
+	databaseInterface "cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
+	envInterface "cnb.cool/mliev/examples/go-web/internal/pkg/env/interfaces"
+	loggerInterface "cnb.cool/mliev/examples/go-web/internal/pkg/logger/interfaces"
+	redisInterface "cnb.cool/mliev/examples/go-web/internal/pkg/redis/interfaces"
 )
 
 type Helper struct {
 }
 
-func Env() interfaces3.EnvInterface {
+func Env() envInterface.EnvInterface {
 	return env.EnvHelper
 }
 
-func Logger() interfaces4.LoggerInterface {
+func Config() configInterface.ConfigInterface {
+	return config.ConfigHelper
+}
+
+func Logger() loggerInterface.LoggerInterface {
 	return logger.LoggerHelper
 }
 
-func Redis() interfaces.RedisInterface {
+func Redis() redisInterface.RedisInterface {
 	return redis.RedisHelper
 }
 
-func Database() interfaces2.DatabaseInterface {
+func Database() databaseInterface.DatabaseInterface {
 	return database.DatabaseHelper
 }

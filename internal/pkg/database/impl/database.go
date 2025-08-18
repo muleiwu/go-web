@@ -57,6 +57,24 @@ func NewDatabase() *Database {
 	return d
 }
 
+func (d *Database) getMySQLDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dc.Username,
+		dc.Password,
+		dc.Host,
+		dc.Port,
+		dc.DBName)
+}
+
+func (d *Database) getPostgreSQLDSN() string {
+	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
+		dc.Username,
+		dc.Password,
+		dc.Host,
+		dc.Port,
+		dc.DBName)
+}
+
 // 基础连接方法
 func (d *Database) GetDB() *gorm.DB {
 	return d.db
