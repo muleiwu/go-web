@@ -15,17 +15,14 @@ import (
 type Assembly struct {
 }
 
-// Get 注入反转
+// Get 注入反转(确保注入顺序，防止依赖为空或者循环依赖)
 func (receiver Assembly) Get() []interfaces.AssemblyInterface {
+
 	return []interfaces.AssemblyInterface{
-		&configAssembly.Config{
-			DefaultConfigs: []configInterface.InitConfig{
-				autoload.Base{},
-			},
-		},
-		&envAssembly.Env{},
-		&loggerAssembly.Logger{},
-		&databaseAssembly.Database{Config: helper.Config()},
-		&redisAssembly.Redis{Config: helper.Config()},
+		&envAssembly.Env{}, // 环境变量
+		&configAssembly.Config{DefaultConfigs: []configInterface.InitConfig{autoload.Base{}}}, // 代码中的配置(可使用环境变量)
+		&loggerAssembly.Logger{},                            // 日志驱动
+		&databaseAssembly.Database{Config: helper.Config()}, // 数据库配置
+		&redisAssembly.Redis{Config: helper.Config()},       // redis 配置
 	}
 }
