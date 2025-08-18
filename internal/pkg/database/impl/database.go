@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/helper/env"
+	configInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/database/config"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -12,36 +13,30 @@ import (
 )
 
 type Database struct {
-	db          *gorm.DB
-	initialized bool
-	initOnce    sync.Once
-	initError   error
+	db              *gorm.DB
+	initialized     bool
+	initOnce        sync.Once
+	initError       error
+	configInterface configInterface.ConfigInterface
+	config          *config.DatabaseConfig
 }
 
-func NewDatabase() *Database {
-	d := &Database{}
+func NewDatabase(configInterface configInterface.ConfigInterface) *Database {
+	databaseConfig := config.NewConfig(configInterface)
+	d := &Database{
+		configInterface: configInterface,
+		config:          databaseConfig,
+	}
 	d.initOnce.Do(func() {
-		// 从env helper获取配置
-		driver := env.EnvHelper.GetString("db.driver", "postgresql")
-		host := env.EnvHelper.GetString("db.host", "127.0.0.1")
-		port := env.EnvHelper.GetInt("db.port", 5432)
-		dbname := env.EnvHelper.GetString("db.dbname", "test")
-		username := env.EnvHelper.GetString("db.username", "test")
-		password := env.EnvHelper.GetString("db.password", "123456")
 
 		var dialector gorm.Dialector
-		if driver == "postgresql" {
-			dsn := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
-				username, password, host, port, dbname)
+		if configInterface.GetString("database.driver", "mysql") == "postgresql" {
 			dialector = postgres.New(postgres.Config{
-				DSN:                  dsn,
+				DSN:                  databaseConfig.GetPostgreSQLDSN(),
 				PreferSimpleProtocol: true,
 			})
 		} else {
-			// Default to MySQL
-			dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-				username, password, host, port, dbname)
-			dialector = mysql.Open(dsn)
+			dialector = mysql.Open(databaseConfig.GetMySQLDSN())
 		}
 
 		var err error
@@ -55,24 +50,6 @@ func NewDatabase() *Database {
 	})
 
 	return d
-}
-
-func (d *Database) getMySQLDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dc.Username,
-		dc.Password,
-		dc.Host,
-		dc.Port,
-		dc.DBName)
-}
-
-func (d *Database) getPostgreSQLDSN() string {
-	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
-		dc.Username,
-		dc.Password,
-		dc.Host,
-		dc.Port,
-		dc.DBName)
 }
 
 // 基础连接方法
