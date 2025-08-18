@@ -1,21 +1,45 @@
 package config
 
 import (
-	envInterface "cnb.cool/mliev/examples/go-web/internal/pkg/env/interfaces"
+	"fmt"
+
+	configInterface "cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
 )
 
-type Config struct {
-	env    envInterface.EnvInterface
-	Driver string `json:"driver"`
+type DatabaseConfig struct {
+	Driver   string `json:"driver"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	DBName   string `json:"dbname"`
 }
 
-func (receiver Config) InitConfig() map[string]any {
-	return map[string]any{
-		"database.driver":   receiver.env.GetString("database.driver", "mysql"),
-		"database.host":     receiver.env.GetString("database.host", "127.0.0.1"),
-		"database.port":     receiver.env.GetInt("database.port", 3306),
-		"database.dbname":   receiver.env.GetString("database.dbname", "test"),
-		"database.username": receiver.env.GetString("database.username", "test"),
-		"database.password": receiver.env.GetString("database.password", "123456"),
+func NewConfig(config configInterface.ConfigInterface) *DatabaseConfig {
+	return &DatabaseConfig{
+		Driver:   config.GetString("database.driver", "postgresql"),
+		Host:     config.GetString("database.host", "127.0.0.1"),
+		Port:     config.GetInt("database.port", 5432),
+		DBName:   config.GetString("database.dbname", "test"),
+		Username: config.GetString("database.username", "test"),
+		Password: config.GetString("database.password", "123456"),
 	}
+}
+
+func (dc *DatabaseConfig) GetMySQLDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dc.Username,
+		dc.Password,
+		dc.Host,
+		dc.Port,
+		dc.DBName)
+}
+
+func (dc *DatabaseConfig) GetPostgreSQLDSN() string {
+	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
+		dc.Username,
+		dc.Password,
+		dc.Host,
+		dc.Port,
+		dc.DBName)
 }

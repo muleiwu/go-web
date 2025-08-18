@@ -2,6 +2,7 @@ package config
 
 import (
 	"cnb.cool/mliev/examples/go-web/config/autoload"
+	"cnb.cool/mliev/examples/go-web/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	configAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/config/assembly"
 	configInterface "cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
@@ -24,7 +25,7 @@ func (receiver Assembly) Get() []interfaces.AssemblyInterface {
 		},
 		envAssembly.Env{},
 		loggerAssembly.Logger{},
-		databaseAssembly.Database{},
+		databaseAssembly.Database{Config: helper.Config()},
 		redisAssembly.Redis{},
 	}
 }
