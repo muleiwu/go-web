@@ -23,7 +23,8 @@ func Start() {
 // initializeServices 初始化所有服务
 func initializeServices() {
 
-	for _, assemblyInterface := range (config.Assembly{}).Get() {
+	assembly := config.Assembly{}
+	for _, assemblyInterface := range assembly.Get() {
 		assemblyInterface.Assembly()
 	}
 

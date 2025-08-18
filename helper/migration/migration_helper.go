@@ -10,7 +10,7 @@ import (
 // AutoMigrate performs database migration using the new architecture
 func AutoMigrate() error {
 	// Auto migrate the database schema using migration config
-	migrationConfig := config.MigrationConfig{}
+	migrationConfig := config.Migration{}
 	migrationModels := migrationConfig.Get()
 
 	if len(migrationModels) > 0 {
