@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"cnb.cool/mliev/examples/go-web/helper/logger"
-	"cnb.cool/mliev/examples/go-web/internal/impl"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/logger/impl"
 )
 
 type Logger struct {

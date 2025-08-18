@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"cnb.cool/mliev/examples/go-web/helper/redis"
-	"cnb.cool/mliev/examples/go-web/internal/impl"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/redis/impl"
 )
 
 type Redis struct {

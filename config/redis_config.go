@@ -1,8 +1,9 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/helper"
 	"fmt"
+
+	"cnb.cool/mliev/examples/go-web/helper"
 	"github.com/redis/go-redis/v9"
 )
 
