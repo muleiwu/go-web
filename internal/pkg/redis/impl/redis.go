@@ -7,17 +7,19 @@ import (
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/helper/env"
+	"cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
 	"github.com/redis/go-redis/v9"
 )
 
 type Redis struct {
-	client      *redis.Client
-	initialized bool
-	initOnce    sync.Once
-	initError   error
+	client          *redis.Client
+	initialized     bool
+	initOnce        sync.Once
+	initError       error
+	configInterface interfaces.ConfigInterface
 }
 
-func NewRedis() *Redis {
+func NewRedis(configInterface interfaces.ConfigInterface) *Redis {
 	r := &Redis{}
 	r.initOnce.Do(func() {
 		// 从env helper获取配置

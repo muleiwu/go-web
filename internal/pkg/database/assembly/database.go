@@ -16,7 +16,7 @@ var (
 	databaseOnce sync.Once
 )
 
-func (receiver Database) Assembly() {
+func (receiver *Database) Assembly() {
 	databaseOnce.Do(func() {
 		database.DatabaseHelper = impl.NewDatabase(receiver.Config)
 	})
