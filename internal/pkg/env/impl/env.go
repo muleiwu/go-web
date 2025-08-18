@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"github.com/spf13/viper"
 )
 
@@ -15,6 +16,7 @@ type Env struct {
 	initialized int64     // 原子操作的初始化标志
 	initOnce    sync.Once // 确保只初始化一次
 	initError   error     // 初始化错误
+	Helper      *helper.Helper
 }
 
 func NewEnv() *Env {

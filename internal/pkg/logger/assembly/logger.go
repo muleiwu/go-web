@@ -3,11 +3,12 @@ package assembly
 import (
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/helper/logger"
+	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/logger/impl"
 )
 
 type Logger struct {
+	Helper *helper.Helper
 }
 
 var (
@@ -16,6 +17,6 @@ var (
 
 func (receiver *Logger) Assembly() {
 	loggerOnce.Do(func() {
-		logger.LoggerHelper = impl.NewLogger()
+		receiver.Helper.SetLogger(impl.NewLogger())
 	})
 }

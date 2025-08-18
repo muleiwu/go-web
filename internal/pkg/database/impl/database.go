@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	configInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/config"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
 	"gorm.io/driver/mysql"
@@ -13,24 +13,24 @@ import (
 )
 
 type Database struct {
-	db              *gorm.DB
-	initialized     bool
-	initOnce        sync.Once
-	initError       error
-	configInterface configInterface.ConfigInterface
-	config          *config.DatabaseConfig
+	db          *gorm.DB
+	initialized bool
+	initOnce    sync.Once
+	initError   error
+	config      *config.DatabaseConfig
+	helper      *helper.Helper
 }
 
-func NewDatabase(configInterface configInterface.ConfigInterface) *Database {
-	databaseConfig := config.NewConfig(configInterface)
+func NewDatabase(helper *helper.Helper) *Database {
+	databaseConfig := config.NewConfig(helper.GetConfig())
 	d := &Database{
-		configInterface: configInterface,
-		config:          databaseConfig,
+		config: databaseConfig,
+		helper: helper,
 	}
 	d.initOnce.Do(func() {
 
 		var dialector gorm.Dialector
-		if configInterface.GetString("database.driver", "mysql") == "postgresql" {
+		if helper.GetConfig().GetString("database.driver", "mysql") == "postgresql" {
 			dialector = postgres.New(postgres.Config{
 				DSN:                  databaseConfig.GetPostgreSQLDSN(),
 				PreferSimpleProtocol: true,
