@@ -16,7 +16,7 @@ var (
 	configOnce sync.Once
 )
 
-func (receiver Config) Assembly() {
+func (receiver *Config) Assembly() {
 	configOnce.Do(func() {
 		config.ConfigHelper = configImpl.NewConfig()
 		for _, defaultConfig := range receiver.DefaultConfigs {

@@ -14,7 +14,7 @@ var (
 	envOnce sync.Once
 )
 
-func (receiver Env) Assembly() {
+func (receiver *Env) Assembly() {
 	envOnce.Do(func() {
 		env.EnvHelper = impl.NewEnv()
 	})

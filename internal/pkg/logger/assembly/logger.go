@@ -14,7 +14,7 @@ var (
 	loggerOnce sync.Once
 )
 
-func (receiver Logger) Assembly() {
+func (receiver *Logger) Assembly() {
 	loggerOnce.Do(func() {
 		logger.LoggerHelper = impl.NewLogger()
 	})

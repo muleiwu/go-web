@@ -18,14 +18,14 @@ type Assembly struct {
 // Get 注入反转
 func (receiver Assembly) Get() []interfaces.AssemblyInterface {
 	return []interfaces.AssemblyInterface{
-		configAssembly.Config{
+		&configAssembly.Config{
 			DefaultConfigs: []configInterface.InitConfig{
 				autoload.Base{},
 			},
 		},
-		envAssembly.Env{},
-		loggerAssembly.Logger{},
-		databaseAssembly.Database{Config: helper.Config()},
-		redisAssembly.Redis{},
+		&envAssembly.Env{},
+		&loggerAssembly.Logger{},
+		&databaseAssembly.Database{Config: helper.Config()},
+		&redisAssembly.Redis{Config: helper.Config()},
 	}
 }
