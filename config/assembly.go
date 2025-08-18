@@ -16,7 +16,7 @@ type Assembly struct {
 }
 
 // Get 注入反转(确保注入顺序，防止依赖为空或者循环依赖)
-func (receiver Assembly) Get() []interfaces.AssemblyInterface {
+func (receiver *Assembly) Get() []interfaces.AssemblyInterface {
 
 	return []interfaces.AssemblyInterface{
 		&envAssembly.Env{}, // 环境变量
