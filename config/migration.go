@@ -1,7 +1,5 @@
 package config
 
-import "cnb.cool/mliev/examples/go-web/app/model"
-
 type Migration struct {
 	// 是否启用自动迁移
 	AutoMigrate bool
@@ -14,6 +12,6 @@ func (receiver Migration) Get() []any {
 		return receiver.Models
 	}
 	return []any{
-		&model.TestDemo{},
+		//&model.TestDemo{},
 	}
 }
