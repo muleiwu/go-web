@@ -3,13 +3,12 @@ package assembly
 import (
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/internal/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/impl"
 )
 
 type Database struct {
-	Config interfaces.ConfigInterface
+	Helper *helper.Helper
 }
 
 var (
@@ -18,6 +17,6 @@ var (
 
 func (receiver *Database) Assembly() {
 	databaseOnce.Do(func() {
-		database.DatabaseHelper = impl.NewDatabase(receiver.Config)
+		receiver.Helper.SetDatabase(impl.NewDatabase(receiver.Helper))
 	})
 }

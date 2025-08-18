@@ -3,13 +3,12 @@ package assembly
 import (
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/helper/redis"
-	"cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/redis/impl"
 )
 
 type Redis struct {
-	Config interfaces.ConfigInterface
+	Helper *helper.Helper
 }
 
 var (
@@ -18,6 +17,6 @@ var (
 
 func (receiver *Redis) Assembly() {
 	redisOnce.Do(func() {
-		redis.RedisHelper = impl.NewRedis(receiver.Config)
+		receiver.Helper.SetRedis(impl.NewRedis(receiver.Helper.GetConfig()))
 	})
 }
