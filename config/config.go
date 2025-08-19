@@ -13,5 +13,6 @@ func (receiver Config) Get() []interfaces.InitConfig {
 		autoload.Base{},
 		autoload.Database{},
 		autoload.Redis{},
+		autoload.Middleware{},
 	}
 }
