@@ -6,6 +6,7 @@ import (
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
+	h "cnb.cool/mliev/examples/go-web/internal/helper"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +15,7 @@ type HealthController struct {
 }
 
 // GetHealth 健康检查接口
-func (receiver HealthController) GetHealth(c *gin.Context) {
+func (receiver HealthController) GetHealth(c *gin.Context, helper *h.Helper) {
 	healthStatus := dto.HealthStatus{
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
@@ -22,11 +23,11 @@ func (receiver HealthController) GetHealth(c *gin.Context) {
 	}
 
 	// 检查数据库连接
-	dbStatus := receiver.checkDatabase()
+	dbStatus := receiver.checkDatabase(helper)
 	healthStatus.Services["database"] = dbStatus
 
 	// 检查Redis连接
-	redisStatus := receiver.checkRedis()
+	redisStatus := receiver.checkRedis(helper)
 	healthStatus.Services["redis"] = redisStatus
 
 	// 如果任何服务不健康，整体状态设为DOWN
@@ -42,7 +43,7 @@ func (receiver HealthController) GetHealth(c *gin.Context) {
 }
 
 // GetHealthSimple 简单健康检查接口
-func (receiver HealthController) GetHealthSimple(c *gin.Context) {
+func (receiver HealthController) GetHealthSimple(c *gin.Context, helper *h.Helper) {
 	var baseResponse BaseResponse
 	baseResponse.Success(c, gin.H{
 		"status":    "UP",
@@ -51,8 +52,8 @@ func (receiver HealthController) GetHealthSimple(c *gin.Context) {
 }
 
 // checkDatabase 检查数据库连接
-func (receiver HealthController) checkDatabase() dto.ServiceStatus {
-	databaseHelper := helper.Database()
+func (receiver HealthController) checkDatabase(helper *h.Helper) dto.ServiceStatus {
+	databaseHelper := helper.GetDatabase()
 	if databaseHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
@@ -89,8 +90,8 @@ func (receiver HealthController) checkDatabase() dto.ServiceStatus {
 }
 
 // checkRedis 检查Redis连接
-func (receiver HealthController) checkRedis() dto.ServiceStatus {
-	redisHelper := helper.Redis()
+func (receiver HealthController) checkRedis(helper *h.Helper) dto.ServiceStatus {
+	redisHelper := helper.GetRedis()
 	if redisHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
