@@ -28,7 +28,7 @@ func NewHttpServer(helper *helper.Helper) *HttpServer {
 // RunHttp 启动HTTP服务器并注册路由和中间件
 func (receiver *HttpServer) RunHttp() {
 	// 设置Gin模式
-	if receiver.Helper.GetConfig().GetString("mode", "") == "release" {
+	if receiver.Helper.GetConfig().GetString("http.mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -59,7 +59,7 @@ func (receiver *HttpServer) RunHttp() {
 	receiver.routerFunc(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := receiver.Helper.GetConfig().GetString("addr", ":8080")
+	addr := receiver.Helper.GetConfig().GetString("http.addr", ":8080")
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: engine,
