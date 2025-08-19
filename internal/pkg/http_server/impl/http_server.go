@@ -55,8 +55,14 @@ func (receiver *HttpServer) RunHttp() {
 		receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d", i))
 	}
 
-	//router.InitRouter(engine)
-	receiver.routerFunc(engine)
+	deps := NewHttpDeps(receiver.Helper)
+	header := receiver.Helper.GetConfig().Get("http.router", func(router *gin.Engine, deps *HttpDeps) {
+
+	}).(func(*gin.Engine, *HttpDeps))
+
+	header(engine, deps)
+
+	//receiver.routerFunc(engine)
 
 	// 创建一个HTTP服务器，以便能够优雅关闭
 	addr := receiver.Helper.GetConfig().GetString("http.addr", ":8080")
@@ -91,4 +97,8 @@ func (receiver *HttpServer) RunHttp() {
 	}
 
 	receiver.Helper.GetLogger().Info("服务器已优雅关闭")
+}
+
+func (receiver *HttpServer) InitRouter() {
+
 }
