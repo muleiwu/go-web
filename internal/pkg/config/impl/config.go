@@ -14,7 +14,7 @@ func NewConfig() *Config {
 }
 
 func (c *Config) Set(key string, value any) {
-
+	c.data[key] = value
 }
 
 func (c *Config) Get(key string, defaultValue any) any {
