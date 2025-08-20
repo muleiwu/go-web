@@ -83,20 +83,23 @@ func (receiver *HttpServer) RunHttp() {
 		}
 	}()
 
-	// 等待中断信号
-	<-quit
-	receiver.Helper.GetLogger().Info("正在关闭服务器...")
+	// 在单独的goroutine中等待中断信号以便优雅关闭
+	go func() {
+		// 等待中断信号
+		<-quit
+		receiver.Helper.GetLogger().Info("正在关闭服务器...")
 
-	// 创建一个5秒的上下文用于超时控制
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+		// 创建一个5秒的上下文用于超时控制
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	// 优雅地关闭服务器
-	if err := srv.Shutdown(ctx); err != nil {
-		receiver.Helper.GetLogger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
-	}
+		// 优雅地关闭服务器
+		if err := srv.Shutdown(ctx); err != nil {
+			receiver.Helper.GetLogger().Error(fmt.Sprintf("服务器强制关闭: %v", err))
+		}
 
-	receiver.Helper.GetLogger().Info("服务器已优雅关闭")
+		receiver.Helper.GetLogger().Info("服务器已优雅关闭")
+	}()
 }
 
 func (receiver *HttpServer) InitRouter() {
