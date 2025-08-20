@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"cnb.cool/mliev/examples/go-web/helper/database"
-	"cnb.cool/mliev/examples/go-web/helper/redis"
 	"context"
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +15,7 @@ type HealthController struct {
 }
 
 // GetHealth 健康检查接口
-func (receiver HealthController) GetHealth(c *gin.Context) {
+func (receiver HealthController) GetHealth(c *gin.Context, helper interfaces.HelperInterface) {
 	healthStatus := dto.HealthStatus{
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
@@ -24,11 +23,11 @@ func (receiver HealthController) GetHealth(c *gin.Context) {
 	}
 
 	// 检查数据库连接
-	dbStatus := receiver.checkDatabase()
+	dbStatus := receiver.checkDatabase(helper)
 	healthStatus.Services["database"] = dbStatus
 
 	// 检查Redis连接
-	redisStatus := receiver.checkRedis()
+	redisStatus := receiver.checkRedis(helper)
 	healthStatus.Services["redis"] = redisStatus
 
 	// 如果任何服务不健康，整体状态设为DOWN
@@ -44,7 +43,7 @@ func (receiver HealthController) GetHealth(c *gin.Context) {
 }
 
 // GetHealthSimple 简单健康检查接口
-func (receiver HealthController) GetHealthSimple(c *gin.Context) {
+func (receiver HealthController) GetHealthSimple(c *gin.Context, helper interfaces.HelperInterface) {
 	var baseResponse BaseResponse
 	baseResponse.Success(c, gin.H{
 		"status":    "UP",
@@ -53,20 +52,28 @@ func (receiver HealthController) GetHealthSimple(c *gin.Context) {
 }
 
 // checkDatabase 检查数据库连接
-func (receiver HealthController) checkDatabase() dto.ServiceStatus {
-	database := database.GetDB()
-	if database == nil {
+func (receiver HealthController) checkDatabase(helper interfaces.HelperInterface) dto.ServiceStatus {
+	databaseHelper := helper.GetDatabase()
+	if databaseHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "数据库连接失败",
 		}
 	}
 
-	sqlDB, err := database.DB()
+	gormDB := databaseHelper.GetDB()
+	if gormDB == nil {
+		return dto.ServiceStatus{
+			Status:  "DOWN",
+			Message: "获取数据库连接失败",
+		}
+	}
+
+	sqlDB, err := gormDB.DB()
 	if err != nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
-			Message: "获取数据库连接失败: " + err.Error(),
+			Message: "获取底层数据库连接失败: " + err.Error(),
 		}
 	}
 
@@ -83,17 +90,16 @@ func (receiver HealthController) checkDatabase() dto.ServiceStatus {
 }
 
 // checkRedis 检查Redis连接
-func (receiver HealthController) checkRedis() dto.ServiceStatus {
-	redis := redis.GetRedis()
-	if redis == nil {
+func (receiver HealthController) checkRedis(helper interfaces.HelperInterface) dto.ServiceStatus {
+	redisHelper := helper.GetRedis()
+	if redisHelper == nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "Redis连接失败",
 		}
 	}
-
 	ctx := context.Background()
-	if err := redis.Ping(ctx).Err(); err != nil {
+	if err := redisHelper.Ping(ctx); err != nil {
 		return dto.ServiceStatus{
 			Status:  "DOWN",
 			Message: "Redis ping失败: " + err.Error(),
