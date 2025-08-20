@@ -23,7 +23,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone <your-repo-url>
+git clone https://cnb.cool/mliev/examples/go-web
 cd go-web
 ```
 
@@ -389,10 +389,10 @@ export REDIS_PORT=6379
 ## ❓ 常见问题
 
 ### Q: 如何添加新的API路由？
-A: 在 `router/router_config.go` 中添加路由配置，在 `app/controller/` 中实现控制器。
+A: 在 `config/autoload/router.go` 中添加路由配置，在 `app/controller/` 中实现控制器。
 
 ### Q: 如何添加新的中间件？
-A: 在 `app/middleware/` 中实现中间件，然后在 `config/middleware_config.go` 中注册。
+A: 在 `app/middleware/` 中实现中间件，然后在 `config/autoload/middleware.go` 中注册。
 
 ### Q: 数据库迁移如何工作？
 A: 项目启动时会自动执行 `AutoMigrate()`，根据 Model 定义创建或更新表结构。
@@ -400,8 +400,6 @@ A: 项目启动时会自动执行 `AutoMigrate()`，根据 Model 定义创建或
 ### Q: 如何更换数据库驱动？
 A: 修改 `config.yaml` 中的 `db.driver` 配置，支持 `postgresql` 和 `mysql`。
 
-### Q: 如何自定义日志输出？
-A: 修改 `helper/logger/` 中的日志配置，支持不同的日志级别和输出格式。
 
 ## 📝 开发规范
 
