@@ -10,7 +10,9 @@ type HttpDeps struct {
 }
 
 func NewHttpDeps(helper interfaces.HelperInterface) *HttpDeps {
-	return &HttpDeps{}
+	return &HttpDeps{
+		helper: helper,
+	}
 }
 
 // 使用闭包包装处理函数
