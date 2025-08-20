@@ -10,16 +10,16 @@ import (
 	"syscall"
 	"time"
 
-	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type HttpServer struct {
-	Helper     *helper.Helper
+	Helper     interfaces.HelperInterface
 	routerFunc func(router *gin.Engine)
 }
 
-func NewHttpServer(helper *helper.Helper) *HttpServer {
+func NewHttpServer(helper interfaces.HelperInterface) *HttpServer {
 	return &HttpServer{
 		Helper: helper,
 	}

@@ -3,12 +3,12 @@ package assembly
 import (
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/impl"
 )
 
 type Database struct {
-	Helper *helper.Helper
+	Helper interfaces.HelperInterface
 }
 
 var (

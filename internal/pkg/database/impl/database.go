@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/database/config"
-	"cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,10 +17,10 @@ type Database struct {
 	initOnce    sync.Once
 	initError   error
 	config      *config.DatabaseConfig
-	helper      *helper.Helper
+	helper      interfaces.HelperInterface
 }
 
-func NewDatabase(helper *helper.Helper) *Database {
+func NewDatabase(helper interfaces.HelperInterface) *Database {
 	databaseConfig := config.NewConfig(helper.GetConfig())
 	d := &Database{
 		config: databaseConfig,
