@@ -2,6 +2,7 @@ package autoload
 
 import (
 	"cnb.cool/mliev/examples/go-web/app/controller"
+	envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/http_server/impl"
 	"github.com/gin-gonic/gin"
 )
@@ -9,7 +10,7 @@ import (
 type Router struct {
 }
 
-func (receiver Router) InitConfig() map[string]any {
+func (receiver Router) InitConfig(env envInterface.EnvInterface) map[string]any {
 	return map[string]any{
 		"http.router": func(router *gin.Engine, deps *impl.HttpDeps) {
 

@@ -1,16 +1,18 @@
 package autoload
 
-import envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
+import (
+	envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
+)
 
 type Redis struct {
 	env envInterface.EnvInterface
 }
 
-func (receiver Redis) InitConfig() map[string]any {
+func (receiver Redis) InitConfig(env envInterface.EnvInterface) map[string]any {
 	return map[string]any{
-		"redis.host":     receiver.env.GetString("redis.host", "localhost"),
-		"redis.port":     receiver.env.GetInt("redis.port", 6379),
-		"redis.password": receiver.env.GetString("redis.password", ""),
-		"redis.db":       receiver.env.GetInt("redis.db", 0),
+		"redis.host":     env.GetString("redis.host", "localhost"),
+		"redis.port":     env.GetInt("redis.port", 6379),
+		"redis.password": env.GetString("redis.password", ""),
+		"redis.db":       env.GetInt("redis.db", 0),
 	}
 }

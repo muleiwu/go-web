@@ -1,6 +1,8 @@
 package interfaces
 
-import "time"
+import (
+	"time"
+)
 
 type ConfigInterface interface {
 	Set(key string, value any)
@@ -19,5 +21,5 @@ type ConfigInterface interface {
 }
 
 type InitConfig interface {
-	InitConfig() map[string]any
+	InitConfig(envInterface EnvInterface) map[string]any
 }

@@ -3,17 +3,15 @@ package autoload
 import envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
 
 type Database struct {
-	env    envInterface.EnvInterface
-	Driver string `json:"driver"`
 }
 
-func (receiver Database) InitConfig() map[string]any {
+func (receiver Database) InitConfig(env envInterface.EnvInterface) map[string]any {
 	return map[string]any{
-		"database.driver":   receiver.env.GetString("database.driver", "mysql"),
-		"database.host":     receiver.env.GetString("database.host", "127.0.0.1"),
-		"database.port":     receiver.env.GetInt("database.port", 3306),
-		"database.dbname":   receiver.env.GetString("database.dbname", "test"),
-		"database.username": receiver.env.GetString("database.username", "test"),
-		"database.password": receiver.env.GetString("database.password", "123456"),
+		"database.driver":   env.GetString("database.driver", "mysql"),
+		"database.host":     env.GetString("database.host", "127.0.0.1"),
+		"database.port":     env.GetInt("database.port", 3306),
+		"database.dbname":   env.GetString("database.dbname", "test"),
+		"database.username": env.GetString("database.username", "test"),
+		"database.password": env.GetString("database.password", "123456"),
 	}
 }

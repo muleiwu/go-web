@@ -1,9 +1,11 @@
 package autoload
 
+import envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
+
 type Base struct {
 }
 
-func (receiver Base) InitConfig() map[string]any {
+func (receiver Base) InitConfig(env envInterface.EnvInterface) map[string]any {
 	return map[string]any{
 		"app.base.app_name": "go-web-app",
 	}
