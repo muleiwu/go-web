@@ -1,13 +1,12 @@
 package impl
 
 import (
-	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type HttpDeps struct {
-	helper *helper.Helper
+	helper interfaces.HelperInterface
 }
 
 func NewHttpDeps(helper interfaces.HelperInterface) *HttpDeps {
