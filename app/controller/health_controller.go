@@ -6,7 +6,7 @@ import (
 
 	"cnb.cool/mliev/examples/go-web/app/dto"
 	"cnb.cool/mliev/examples/go-web/constants"
-	h "cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +15,7 @@ type HealthController struct {
 }
 
 // GetHealth 健康检查接口
-func (receiver HealthController) GetHealth(c *gin.Context, helper *h.Helper) {
+func (receiver HealthController) GetHealth(c *gin.Context, helper interfaces.HelperInterface) {
 	healthStatus := dto.HealthStatus{
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
@@ -43,7 +43,7 @@ func (receiver HealthController) GetHealth(c *gin.Context, helper *h.Helper) {
 }
 
 // GetHealthSimple 简单健康检查接口
-func (receiver HealthController) GetHealthSimple(c *gin.Context, helper *h.Helper) {
+func (receiver HealthController) GetHealthSimple(c *gin.Context, helper interfaces.HelperInterface) {
 	var baseResponse BaseResponse
 	baseResponse.Success(c, gin.H{
 		"status":    "UP",
@@ -52,7 +52,7 @@ func (receiver HealthController) GetHealthSimple(c *gin.Context, helper *h.Helpe
 }
 
 // checkDatabase 检查数据库连接
-func (receiver HealthController) checkDatabase(helper *h.Helper) dto.ServiceStatus {
+func (receiver HealthController) checkDatabase(helper interfaces.HelperInterface) dto.ServiceStatus {
 	databaseHelper := helper.GetDatabase()
 	if databaseHelper == nil {
 		return dto.ServiceStatus{
@@ -90,7 +90,7 @@ func (receiver HealthController) checkDatabase(helper *h.Helper) dto.ServiceStat
 }
 
 // checkRedis 检查Redis连接
-func (receiver HealthController) checkRedis(helper *h.Helper) dto.ServiceStatus {
+func (receiver HealthController) checkRedis(helper interfaces.HelperInterface) dto.ServiceStatus {
 	redisHelper := helper.GetRedis()
 	if redisHelper == nil {
 		return dto.ServiceStatus{

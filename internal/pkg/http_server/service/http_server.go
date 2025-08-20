@@ -1,12 +1,12 @@
 package service
 
 import (
-	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/http_server/impl"
 )
 
 type HttpServer struct {
-	Helper *helper.Helper
+	Helper interfaces.HelperInterface
 }
 
 func (receiver *HttpServer) Run() error {

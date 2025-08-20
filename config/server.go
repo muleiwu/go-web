@@ -1,14 +1,13 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"cnb.cool/mliev/examples/go-web/internal/pkg/http_server/service"
 	"cnb.cool/mliev/examples/go-web/internal/service/migration"
 )
 
 type Server struct {
-	Helper *helper.Helper
+	Helper interfaces.HelperInterface
 }
 
 func (receiver Server) Get() []interfaces.ServerInterface {

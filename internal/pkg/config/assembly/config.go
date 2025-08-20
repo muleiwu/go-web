@@ -3,13 +3,12 @@ package assembly
 import (
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	configImpl "cnb.cool/mliev/examples/go-web/internal/pkg/config/impl"
 )
 
 type Config struct {
-	Helper         *helper.Helper
+	Helper         interfaces.HelperInterface
 	DefaultConfigs []interfaces.InitConfig
 }
 

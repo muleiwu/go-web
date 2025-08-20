@@ -1,7 +1,6 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	configAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/config/assembly"
 	databaseAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/database/assembly"
@@ -11,7 +10,7 @@ import (
 )
 
 type Assembly struct {
-	Helper *helper.Helper
+	Helper interfaces.HelperInterface
 }
 
 // Get 注入反转(确保注入顺序，防止依赖为空或者循环依赖)

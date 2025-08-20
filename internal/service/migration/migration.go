@@ -3,11 +3,11 @@ package migration
 import (
 	"fmt"
 
-	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 )
 
 type Migration struct {
-	Helper    *helper.Helper
+	Helper    interfaces.HelperInterface
 	Migration []any
 }
 

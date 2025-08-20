@@ -1,61 +1,57 @@
 package helper
 
 import (
-	envInterface "cnb.cool/mliev/examples/go-web/internal/interfaces"
-	configInterface "cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
-	databaseInterface "cnb.cool/mliev/examples/go-web/internal/pkg/database/interfaces"
-	loggerInterface "cnb.cool/mliev/examples/go-web/internal/pkg/logger/interfaces"
-	redisInterface "cnb.cool/mliev/examples/go-web/internal/pkg/redis/interfaces"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 )
 
 type Helper struct {
-	env      envInterface.EnvInterface
-	config   configInterface.ConfigInterface
-	logger   loggerInterface.LoggerInterface
-	redis    redisInterface.RedisInterface
-	database databaseInterface.DatabaseInterface
+	env      interfaces.EnvInterface
+	config   interfaces.ConfigInterface
+	logger   interfaces.LoggerInterface
+	redis    interfaces.RedisInterface
+	database interfaces.DatabaseInterface
 }
 
-func NewHelper() *Helper {
+func NewHelper() interfaces.HelperInterface {
 	return &Helper{}
 }
 
-func (receiver *Helper) GetEnv() envInterface.EnvInterface {
+func (receiver *Helper) GetEnv() interfaces.EnvInterface {
 	return receiver.env
 }
 
-func (receiver *Helper) GetConfig() configInterface.ConfigInterface {
+func (receiver *Helper) GetConfig() interfaces.ConfigInterface {
 	return receiver.config
 }
 
-func (receiver *Helper) GetLogger() loggerInterface.LoggerInterface {
+func (receiver *Helper) GetLogger() interfaces.LoggerInterface {
 	return receiver.logger
 }
 
-func (receiver *Helper) GetRedis() redisInterface.RedisInterface {
+func (receiver *Helper) GetRedis() interfaces.RedisInterface {
 	return receiver.redis
 }
 
-func (receiver *Helper) GetDatabase() databaseInterface.DatabaseInterface {
+func (receiver *Helper) GetDatabase() interfaces.DatabaseInterface {
 	return receiver.database
 }
 
-func (receiver *Helper) SetEnv(env envInterface.EnvInterface) {
+func (receiver *Helper) SetEnv(env interfaces.EnvInterface) {
 	receiver.env = env
 }
 
-func (receiver *Helper) SetConfig(config configInterface.ConfigInterface) {
+func (receiver *Helper) SetConfig(config interfaces.ConfigInterface) {
 	receiver.config = config
 }
 
-func (receiver *Helper) SetLogger(logger loggerInterface.LoggerInterface) {
+func (receiver *Helper) SetLogger(logger interfaces.LoggerInterface) {
 	receiver.logger = logger
 }
 
-func (receiver *Helper) SetRedis(redis redisInterface.RedisInterface) {
+func (receiver *Helper) SetRedis(redis interfaces.RedisInterface) {
 	receiver.redis = redis
 }
 
-func (receiver *Helper) SetDatabase(database databaseInterface.DatabaseInterface) {
+func (receiver *Helper) SetDatabase(database interfaces.DatabaseInterface) {
 	receiver.database = database
 }
