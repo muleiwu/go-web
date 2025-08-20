@@ -1,11 +1,9 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/config/autoload"
 	"cnb.cool/mliev/examples/go-web/internal/helper"
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	configAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/config/assembly"
-	configInterface "cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
 	databaseAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/database/assembly"
 	envAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/env/assembly"
 	loggerAssembly "cnb.cool/mliev/examples/go-web/internal/pkg/logger/assembly"
@@ -22,8 +20,8 @@ func (receiver *Assembly) Get() []interfaces.AssemblyInterface {
 	return []interfaces.AssemblyInterface{
 		&envAssembly.Env{Helper: receiver.Helper}, // 环境变量
 		&configAssembly.Config{ // 代码中的配置(可使用环境变量)
-			Helper:         receiver.Helper,                               // 注入
-			DefaultConfigs: []configInterface.InitConfig{autoload.Base{}}, //注入默认配置
+			Helper:         receiver.Helper, // 注入
+			DefaultConfigs: Config{}.Get(),  //注入默认配置
 		},
 		&loggerAssembly.Logger{Helper: receiver.Helper},     // 日志驱动
 		&databaseAssembly.Database{Helper: receiver.Helper}, // 数据库配置

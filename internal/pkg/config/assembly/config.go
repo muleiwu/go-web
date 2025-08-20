@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"cnb.cool/mliev/examples/go-web/internal/helper"
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	configImpl "cnb.cool/mliev/examples/go-web/internal/pkg/config/impl"
-	"cnb.cool/mliev/examples/go-web/internal/pkg/config/interfaces"
 )
 
 type Config struct {
@@ -21,7 +21,7 @@ func (receiver *Config) Assembly() {
 	configOnce.Do(func() {
 		configHelper := configImpl.NewConfig()
 		for _, defaultConfig := range receiver.DefaultConfigs {
-			initConfigs := defaultConfig.InitConfig()
+			initConfigs := defaultConfig.InitConfig(receiver.Helper.GetEnv())
 			for key, val := range initConfigs {
 				configHelper.Set(key, val)
 			}
