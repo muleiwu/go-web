@@ -1,8 +1,7 @@
 package impl
 
 import (
-	"fmt"
-
+	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"go.uber.org/zap"
 )
 
@@ -16,26 +15,37 @@ func NewLogger() *Logger {
 	return logger
 }
 
-func (receiver *Logger) Debug(format string, args ...any) {
-	receiver.logger.Debug(fmt.Sprintf(format, args))
+func (receiver *Logger) getFields(args ...interfaces.LoggerFieldInterface) []zap.Field {
+	fields := make([]zap.Field, 0)
+
+	for _, arg := range args {
+		fields = append(fields, zap.Any(arg.GetKey(), arg.GetValue()))
+	}
+
+	return fields
 }
 
-func (receiver *Logger) Info(format string, args ...any) {
-	receiver.logger.Info(fmt.Sprintf(format, args))
+func (receiver *Logger) Debug(format string, args ...interfaces.LoggerFieldInterface) {
+
+	receiver.logger.Debug(format, receiver.getFields(args...)...)
 }
 
-func (receiver *Logger) Notice(format string, args ...any) {
-	receiver.logger.Info(fmt.Sprintf(format, args))
+func (receiver *Logger) Info(format string, args ...interfaces.LoggerFieldInterface) {
+	receiver.logger.Info(format, receiver.getFields(args...)...)
 }
 
-func (receiver *Logger) Error(format string, args ...any) {
-	receiver.logger.Error(fmt.Sprintf(format, args))
+func (receiver *Logger) Notice(format string, args ...interfaces.LoggerFieldInterface) {
+	receiver.logger.Info(format, receiver.getFields(args...)...)
 }
 
-func (receiver *Logger) Warn(format string, args ...any) {
-	receiver.logger.Warn(fmt.Sprintf(format, args))
+func (receiver *Logger) Error(format string, args ...interfaces.LoggerFieldInterface) {
+	receiver.logger.Error(format, receiver.getFields(args...)...)
 }
 
-func (receiver *Logger) Fatal(format string, args ...any) {
-	receiver.logger.Fatal(fmt.Sprintf(format, args))
+func (receiver *Logger) Warn(format string, args ...interfaces.LoggerFieldInterface) {
+	receiver.logger.Warn(format, receiver.getFields(args...)...)
+}
+
+func (receiver *Logger) Fatal(format string, args ...interfaces.LoggerFieldInterface) {
+	receiver.logger.Fatal(format, receiver.getFields(args...)...)
 }
