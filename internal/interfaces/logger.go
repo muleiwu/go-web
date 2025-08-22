@@ -1,10 +1,10 @@
 package interfaces
 
 type LoggerInterface interface {
-	Debug(format string, args ...interface{})
-	Info(format string, args ...interface{})
-	Notice(format string, args ...interface{})
-	Error(format string, args ...interface{})
-	Warn(format string, args ...interface{})
-	Fatal(format string, args ...interface{})
+	Debug(format string, args ...any)
+	Info(format string, args ...any)
+	Notice(format string, args ...any)
+	Error(format string, args ...any)
+	Warn(format string, args ...any)
+	Fatal(format string, args ...any)
 }

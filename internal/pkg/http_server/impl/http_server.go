@@ -12,6 +12,7 @@ import (
 
 	"cnb.cool/mliev/examples/go-web/internal/interfaces"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type HttpServer struct {
@@ -41,8 +42,8 @@ func (receiver *HttpServer) RunHttp() {
 	// 配置Gin引擎
 	// 配置Gin引擎并替换默认logger
 	engine := gin.New()
+	engine.Use(receiver.traceIdMiddleware())
 	engine.Use(gin.Recovery())
-	//engine.Use(GinZapLogger())
 
 	// 注册中间件
 	//handlerFuncs := config.MiddlewareConfig{}.Get()
@@ -55,7 +56,7 @@ func (receiver *HttpServer) RunHttp() {
 		receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d", i))
 	}
 
-	deps := NewHttpDeps(receiver.Helper)
+	deps := NewHttpDeps(receiver.Helper, engine)
 	header := receiver.Helper.GetConfig().Get("http.router", func(router *gin.Engine, deps *HttpDeps) {
 
 	}).(func(*gin.Engine, *HttpDeps))
@@ -77,7 +78,7 @@ func (receiver *HttpServer) RunHttp() {
 
 	// 在单独的goroutine中启动服务器
 	go func() {
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("服务器启动于 %s", addr))
+		receiver.Helper.GetLogger().Info("服务器启动于 %s", addr)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			receiver.Helper.GetLogger().Error(fmt.Sprintf("启动服务器失败: %v", err))
 		}
@@ -102,6 +103,10 @@ func (receiver *HttpServer) RunHttp() {
 	}()
 }
 
-func (receiver *HttpServer) InitRouter() {
-
+func (receiver *HttpServer) traceIdMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uuidV4 := uuid.New()
+		c.Set("traceId", uuidV4)
+		c.Next()
+	}
 }
