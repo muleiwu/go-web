@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"cnb.cool/mliev/examples/go-web/app/constants"
 	"cnb.cool/mliev/examples/go-web/app/dto"
-	"cnb.cool/mliev/examples/go-web/constants"
 	"github.com/gin-gonic/gin"
 )
 
