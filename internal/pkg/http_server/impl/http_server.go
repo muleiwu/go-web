@@ -105,8 +105,9 @@ func (receiver *HttpServer) RunHttp() {
 
 func (receiver *HttpServer) traceIdMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uuidV4 := uuid.New()
+		uuidV4 := uuid.New().String()
 		c.Set("traceId", uuidV4)
+		c.Writer.Header().Set("trace-id", uuidV4)
 		c.Next()
 	}
 }
