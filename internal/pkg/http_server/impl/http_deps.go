@@ -30,7 +30,7 @@ func (d *HttpDeps) getTraceId(c *gin.Context) string {
 
 func (d *HttpDeps) getHttpDeps(traceId string) interfaces.HelperInterface {
 	h := &helper2.Helper{}
-	h.SetLogger(d.helper.GetLogger())
+	h.SetLogger(d.getLogger(d.helper.GetLogger(), traceId))
 	h.SetDatabase(d.helper.GetDatabase())
 	h.SetRedis(d.helper.GetRedis())
 	h.SetConfig(d.helper.GetConfig())
