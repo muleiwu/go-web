@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -48,13 +50,14 @@ func (receiver *HttpServer) RunHttp() {
 	// 注册中间件
 	//handlerFuncs := config.MiddlewareConfig{}.Get()
 	middlewareFuncList := receiver.Helper.GetConfig().Get("http.middleware", []gin.HandlerFunc{}).([]gin.HandlerFunc)
-	for i, handlerFunc := range middlewareFuncList {
+	for _, handlerFunc := range middlewareFuncList {
 		if handlerFunc == nil {
 			continue
 		}
 		engine.Use(handlerFunc)
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d", i))
+		receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %s", receiver.GetFunctionName(handlerFunc)))
 	}
+	receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d 个", len(middlewareFuncList)))
 
 	deps := NewHttpDeps(receiver.Helper, engine)
 	header := receiver.Helper.GetConfig().Get("http.router", func(router *gin.Engine, deps *HttpDeps) {
@@ -101,6 +104,11 @@ func (receiver *HttpServer) RunHttp() {
 
 		receiver.Helper.GetLogger().Info("服务器已优雅关闭")
 	}()
+}
+
+// GetFunctionName 获取函数名
+func (receiver *HttpServer) GetFunctionName(i any) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
 func (receiver *HttpServer) traceIdMiddleware() gin.HandlerFunc {
