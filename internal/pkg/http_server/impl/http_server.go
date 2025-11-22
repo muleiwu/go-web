@@ -123,6 +123,11 @@ func (receiver *HttpServer) Stop() error {
 func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 	staticFs := receiver.Helper.GetConfig().Get("static.fs", map[string]embed.FS{}).(map[string]embed.FS)
 
+	receiver.Helper.GetLogger().Info(fmt.Sprintf("加载静态文件系统, 键数量: %d", len(staticFs)))
+	for key := range staticFs {
+		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 静态文件系统键: %s", key))
+	}
+
 	templates, ok := staticFs["templates"]
 
 	if !ok {
@@ -132,20 +137,59 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 	// 从嵌入的文件系统创建子文件系统
 	subFS, err := fs.Sub(templates, "templates")
 	if err != nil {
-		return err
+		return fmt.Errorf("创建子文件系统失败: %v", err)
 	}
 
-	parseFS, err := template.New("").ParseFS(subFS, "*.html")
-
+	// 收集所有 HTML 文件路径
+	var templateFiles []string
+	err = fs.WalkDir(subFS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && len(path) > 5 && path[len(path)-5:] == ".html" {
+			templateFiles = append(templateFiles, path)
+			receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 找到模板文件: %s", path))
+		}
+		return nil
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("遍历模板文件失败: %v", err)
 	}
 
-	// 创建模板并解析所有模板文件
-	tmpl := template.Must(parseFS, err)
+	if len(templateFiles) == 0 {
+		return errors.New("没有找到任何模板文件")
+	}
+
+	receiver.Helper.GetLogger().Info(fmt.Sprintf("共找到 %d 个模板文件", len(templateFiles)))
+
+	// 创建模板实例，手动解析每个文件并保留完整路径作为模板名称
+	tmpl := template.New("")
+	for _, file := range templateFiles {
+		// 读取模板文件内容
+		content, err := fs.ReadFile(subFS, file)
+		if err != nil {
+			return fmt.Errorf("读取模板文件 %s 失败: %v", file, err)
+		}
+
+		// 使用完整路径作为模板名称
+		_, err = tmpl.New(file).Parse(string(content))
+		if err != nil {
+			return fmt.Errorf("解析模板文件 %s 失败: %v", file, err)
+		}
+
+		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 解析模板: %s", file))
+	}
+
+	// 列出所有已定义的模板
+	receiver.Helper.GetLogger().Info("已定义的模板:")
+	for _, t := range tmpl.Templates() {
+		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 模板名称: %s", t.Name()))
+	}
 
 	// 设置HTML模板
 	engine.SetHTMLTemplate(tmpl)
+
+	receiver.Helper.GetLogger().Info("模板加载成功")
 
 	return nil
 }
