@@ -54,7 +54,7 @@ func (receiver *HttpServer) RunHttp() {
 
 	// 加载HTML模板
 	if err := receiver.loadTemplates(engine); err != nil {
-		receiver.Helper.GetLogger().Error(fmt.Sprintf("加载模板失败: %v", err))
+		panic(err)
 	}
 
 	// 加载网站静态资源
