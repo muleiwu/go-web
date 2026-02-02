@@ -157,7 +157,8 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 	}
 
 	if len(templateFiles) == 0 {
-		return errors.New("没有找到任何模板文件")
+		receiver.Helper.GetLogger().Warn("没有找到任何模板文件")
+		return nil
 	}
 
 	receiver.Helper.GetLogger().Info(fmt.Sprintf("共找到 %d 个模板文件", len(templateFiles)))
