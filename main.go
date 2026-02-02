@@ -4,6 +4,7 @@ import (
 	"embed"
 
 	"cnb.cool/mliev/examples/go-web/cmd"
+	"github.com/muleiwu/gomander"
 )
 
 //go:embed templates/**
@@ -13,9 +14,13 @@ var templateFS embed.FS
 var staticFs embed.FS
 
 func main() {
-	staticFs := map[string]embed.FS{
+
+	thatFs := map[string]embed.FS{
 		"templates":  templateFS,
 		"web.static": staticFs,
 	}
-	cmd.Start(staticFs)
+
+	gomander.Run(func() {
+		cmd.Start(thatFs)
+	})
 }
