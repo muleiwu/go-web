@@ -4,7 +4,7 @@ import (
 	"cnb.cool/mliev/examples/go-web/config/autoload"
 	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
 	"cnb.cool/mliev/examples/go-web/pkg/server/http_server/service"
-	"cnb.cool/mliev/examples/go-web/pkg/service/migration"
+	"cnb.cool/mliev/examples/go-web/pkg/server/migration"
 )
 
 type Server struct {
