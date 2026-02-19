@@ -15,6 +15,7 @@ import (
 	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/muleiwu/golog"
 )
 
 type HttpServer struct {
@@ -234,37 +235,37 @@ func (receiver *HttpServer) ginLogger() gin.HandlerFunc {
 		statusCode := c.Writer.Status()
 		if statusCode >= 500 {
 			zapLogger.Error("请求处理",
-				NewLoggerField("traceId", traceId),
-				NewLoggerField("method", c.Request.Method),
-				NewLoggerField("path", path),
-				NewLoggerField("query", query),
-				NewLoggerField("status", statusCode),
-				NewLoggerField("ip", c.ClientIP()),
-				NewLoggerField("latency", cost),
-				NewLoggerField("user-agent", c.Request.UserAgent()),
-				NewLoggerField("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
+				golog.Field("traceId", traceId),
+				golog.Field("method", c.Request.Method),
+				golog.Field("path", path),
+				golog.Field("query", query),
+				golog.Field("status", statusCode),
+				golog.Field("ip", c.ClientIP()),
+				golog.Field("latency", cost),
+				golog.Field("user-agent", c.Request.UserAgent()),
+				golog.Field("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
 			)
 		} else if statusCode >= 400 {
 			zapLogger.Warn("请求处理",
-				NewLoggerField("traceId", traceId),
-				NewLoggerField("method", c.Request.Method),
-				NewLoggerField("path", path),
-				NewLoggerField("query", query),
-				NewLoggerField("status", statusCode),
-				NewLoggerField("ip", c.ClientIP()),
-				NewLoggerField("latency", cost),
-				NewLoggerField("user-agent", c.Request.UserAgent()),
+				golog.Field("traceId", traceId),
+				golog.Field("method", c.Request.Method),
+				golog.Field("path", path),
+				golog.Field("query", query),
+				golog.Field("status", statusCode),
+				golog.Field("ip", c.ClientIP()),
+				golog.Field("latency", cost),
+				golog.Field("user-agent", c.Request.UserAgent()),
 			)
 		} else {
 			zapLogger.Info("请求处理",
-				NewLoggerField("traceId", traceId),
-				NewLoggerField("method", c.Request.Method),
-				NewLoggerField("path", path),
-				NewLoggerField("query", query),
-				NewLoggerField("status", statusCode),
-				NewLoggerField("ip", c.ClientIP()),
-				NewLoggerField("latency", cost),
-				NewLoggerField("user-agent", c.Request.UserAgent()),
+				golog.Field("traceId", traceId),
+				golog.Field("method", c.Request.Method),
+				golog.Field("path", path),
+				golog.Field("query", query),
+				golog.Field("status", statusCode),
+				golog.Field("ip", c.ClientIP()),
+				golog.Field("latency", cost),
+				golog.Field("user-agent", c.Request.UserAgent()),
 			)
 		}
 	}
