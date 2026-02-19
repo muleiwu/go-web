@@ -6,7 +6,7 @@ import (
 
 	"cnb.cool/mliev/examples/go-web/app/constants"
 	"cnb.cool/mliev/examples/go-web/app/dto"
-	"cnb.cool/mliev/examples/go-web/internal/interfaces"
+	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 )
 

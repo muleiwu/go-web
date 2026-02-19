@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/config"
-	helper2 "cnb.cool/mliev/examples/go-web/internal/helper"
-	"cnb.cool/mliev/examples/go-web/internal/interfaces"
-	"cnb.cool/mliev/examples/go-web/internal/pkg/reload"
+	helper2 "cnb.cool/mliev/examples/go-web/pkg/helper"
+	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/examples/go-web/pkg/server/reload"
 )
 
 // Start 启动应用程序
