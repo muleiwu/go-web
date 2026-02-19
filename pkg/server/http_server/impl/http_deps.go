@@ -1,11 +1,19 @@
 package impl
 
 import (
+	"reflect"
+	"runtime"
+
 	helper2 "cnb.cool/mliev/examples/go-web/pkg/helper"
 	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/muleiwu/gsr"
 )
+
+// lastHandlerName holds the real controller method name resolved just before
+// WrapHandler returns its closure. Route registration is synchronous so this
+// is safe without a mutex.
+var lastHandlerName string
 
 type HttpDeps struct {
 	helper interfaces.HelperInterface
@@ -18,8 +26,10 @@ func NewHttpDeps(helper interfaces.HelperInterface, engine *gin.Engine) *HttpDep
 	}
 }
 
-// WrapHandler 使用闭包包装处理函数
+// WrapHandler 使用闭包包装处理函数，同时将真实 handler 名称存入 lastHandlerName
+// 供 DebugPrintRouteFunc 使用。
 func (d *HttpDeps) WrapHandler(handler func(*gin.Context, interfaces.HelperInterface)) gin.HandlerFunc {
+	lastHandlerName = runtime.FuncForPC(reflect.ValueOf(handler).Pointer()).Name()
 	return func(c *gin.Context) {
 		handler(c, d.getHttpDeps(d.getTraceId(c)))
 	}

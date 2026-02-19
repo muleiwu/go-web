@@ -10,12 +10,14 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"strings"
 	"time"
 
 	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/muleiwu/golog"
+	"github.com/muleiwu/gsr"
 )
 
 type HttpServer struct {
@@ -37,13 +39,24 @@ func (receiver *HttpServer) RunHttp() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// 完全替换gin的默认Logger
+	// 将 Gin 内部调试日志重定向到 golog
 	gin.DisableConsoleColor()
-	//zapLogger := receiver.logger
-	//gin.DefaultWriter = &zapLogWriter{zapLogger: zapLogger}
-	//gin.DefaultErrorWriter = &zapLogWriter{zapLogger: zapLogger, isError: true}
+	gin.DefaultWriter = &gologWriter{logger: receiver.Helper.GetLogger()}
+	gin.DefaultErrorWriter = &gologWriter{logger: receiver.Helper.GetLogger(), isError: true}
 
-	// 配置Gin引擎
+	// 自定义路由注册日志，显示真实控制器方法名而非 WrapHandler.func1
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		if lastHandlerName != "" {
+			handlerName = lastHandlerName
+		}
+		receiver.Helper.GetLogger().Info("路由注册",
+			golog.Field("method", httpMethod),
+			golog.Field("path", absolutePath),
+			golog.Field("handler", handlerName),
+			golog.Field("handlers", nuHandlers),
+		)
+	}
+
 	// 配置Gin引擎并替换默认logger
 	engine := gin.New()
 	// 增加链路的追踪ID
@@ -216,6 +229,26 @@ func (receiver *HttpServer) traceIdMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("trace-id", newUUID.String())
 		c.Next()
 	}
+}
+
+// gologWriter bridges io.Writer (used by gin.DefaultWriter / gin.DefaultErrorWriter)
+// to gsr.Logger, so Gin's internal debug messages pass through golog.
+type gologWriter struct {
+	logger  gsr.Logger
+	isError bool
+}
+
+func (w *gologWriter) Write(p []byte) (n int, err error) {
+	msg := strings.TrimRight(string(p), "\n")
+	if msg == "" {
+		return len(p), nil
+	}
+	if w.isError {
+		w.logger.Error(msg)
+	} else {
+		w.logger.Info(msg)
+	}
+	return len(p), nil
 }
 
 func (receiver *HttpServer) ginLogger() gin.HandlerFunc {
