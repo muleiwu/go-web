@@ -4,6 +4,7 @@ import (
 	"embed"
 
 	"cnb.cool/mliev/open/go-web/cmd"
+	"cnb.cool/mliev/open/go-web/config"
 	"github.com/muleiwu/gomander"
 )
 
@@ -21,6 +22,6 @@ func main() {
 	}
 
 	gomander.Run(func() {
-		cmd.Start(thatFs)
+		cmd.Start(thatFs, config.App{})
 	})
 }
