@@ -1,7 +1,7 @@
 package autoload
 
 import (
-	envInterface "cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	envInterface "cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/muleiwu/gsr"
 )
 

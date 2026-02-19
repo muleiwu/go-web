@@ -31,7 +31,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://cnb.cool/mliev/examples/go-web
+git clone https://cnb.cool/mliev/open/go-web
 cd go-web
 ```
 

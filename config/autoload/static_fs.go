@@ -3,7 +3,7 @@ package autoload
 import (
 	"embed"
 
-	envInterface "cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	envInterface "cnb.cool/mliev/open/go-web/pkg/interfaces"
 )
 
 type StaticFs struct {

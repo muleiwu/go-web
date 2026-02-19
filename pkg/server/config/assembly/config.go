@@ -1,8 +1,8 @@
 package assembly
 
 import (
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	configImpl "cnb.cool/mliev/examples/go-web/pkg/server/config/impl"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	configImpl "cnb.cool/mliev/open/go-web/pkg/server/config/impl"
 )
 
 type Config struct {

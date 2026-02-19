@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"

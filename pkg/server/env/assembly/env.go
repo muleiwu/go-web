@@ -1,8 +1,8 @@
 package assembly
 
 import (
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	"cnb.cool/mliev/examples/go-web/pkg/server/env/impl"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/server/env/impl"
 )
 
 type Env struct {

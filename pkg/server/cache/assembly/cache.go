@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	gocache "github.com/muleiwu/go-cache"
 	"github.com/muleiwu/gsr"
 )

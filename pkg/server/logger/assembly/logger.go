@@ -3,8 +3,8 @@ package assembly
 import (
 	"fmt"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	"cnb.cool/mliev/examples/go-web/pkg/server/logger/impl"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/server/logger/impl"
 )
 
 // Logger is the assembly component responsible for initializing the logger driver.

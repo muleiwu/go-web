@@ -1,8 +1,8 @@
 package service
 
 import (
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	"cnb.cool/mliev/examples/go-web/pkg/server/http_server/impl"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/server/http_server/impl"
 )
 
 type HttpServer struct {

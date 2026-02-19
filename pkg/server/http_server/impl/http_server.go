@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/muleiwu/golog"

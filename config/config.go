@@ -1,8 +1,8 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/config/autoload"
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/config/autoload"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 )
 
 type Config struct {

@@ -3,7 +3,7 @@ package migration
 import (
 	"fmt"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 )
 
 type Migration struct {

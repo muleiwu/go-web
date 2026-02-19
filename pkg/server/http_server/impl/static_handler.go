@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	"cnb.cool/mliev/examples/go-web/pkg/server/http_server/impl/static_handler"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/server/http_server/impl/static_handler"
 	"github.com/gin-gonic/gin"
 )
 

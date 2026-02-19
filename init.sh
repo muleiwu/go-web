@@ -46,7 +46,7 @@ fi
 echo "🔄 将模块路径替换为: $NEW_MODULE_PATH"
 
 # 原始模块路径
-OLD_MODULE_PATH="cnb.cool/mliev/examples/go-web"
+OLD_MODULE_PATH="cnb.cool/mliev/open/go-web"
 
 # 递归查找并替换所有相关文件
 echo "🔍 扫描项目文件..."

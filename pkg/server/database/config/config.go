@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	configInterface "cnb.cool/mliev/examples/go-web/pkg/server/config/interfaces"
+	configInterface "cnb.cool/mliev/open/go-web/pkg/server/config/interfaces"
 )
 
 type DatabaseConfig struct {

@@ -1,10 +1,10 @@
 package config
 
 import (
-	"cnb.cool/mliev/examples/go-web/config/autoload"
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
-	"cnb.cool/mliev/examples/go-web/pkg/server/http_server/service"
-	"cnb.cool/mliev/examples/go-web/pkg/server/migration"
+	"cnb.cool/mliev/open/go-web/config/autoload"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/server/http_server/service"
+	"cnb.cool/mliev/open/go-web/pkg/server/migration"
 )
 
 type Server struct {

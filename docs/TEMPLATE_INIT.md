@@ -92,8 +92,8 @@
 
 ```bash
 # 使用find和sed命令批量替换
-find . -name "*.go" -type f -exec sed -i 's|cnb.cool/mliev/examples/go-web|your-module-path|g' {} +
-sed -i 's|cnb.cool/mliev/examples/go-web|your-module-path|g' go.mod
+find . -name "*.go" -type f -exec sed -i 's|cnb.cool/mliev/open/go-web|your-module-path|g' {} +
+sed -i 's|cnb.cool/mliev/open/go-web|your-module-path|g' go.mod
 go mod tidy
 ```
 

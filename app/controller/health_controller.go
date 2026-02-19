@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"cnb.cool/mliev/examples/go-web/app/constants"
-	"cnb.cool/mliev/examples/go-web/app/dto"
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/app/constants"
+	"cnb.cool/mliev/open/go-web/app/dto"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"runtime"
 
-	helper2 "cnb.cool/mliev/examples/go-web/pkg/helper"
-	"cnb.cool/mliev/examples/go-web/pkg/interfaces"
+	helper2 "cnb.cool/mliev/open/go-web/pkg/helper"
+	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/muleiwu/gsr"
 )

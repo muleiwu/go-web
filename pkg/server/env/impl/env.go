@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cnb.cool/mliev/examples/go-web/pkg/helper"
+	"cnb.cool/mliev/open/go-web/pkg/helper"
 	"github.com/spf13/viper"
 )
 
