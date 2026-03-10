@@ -92,6 +92,10 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
+github.com/muleiwu/anyto v1.0.0 h1:SdDCsgMkXeGV0A7c+2DUAYyYq2t0YjelCnjbqqpaJ80=
+github.com/muleiwu/anyto v1.0.0/go.mod h1:LYFt1kpavPLUUg5iSYsoK+fk/C0PYCsD6ay5ijwFT/g=
+github.com/muleiwu/anyto v1.1.0 h1:m5fAHGw3/AqT71ua5zFYd9jcgWL8ZOfTBMgK8J3S9T8=
+github.com/muleiwu/anyto v1.1.0/go.mod h1:nT3Vh3gkN4bNq7DKWw3aZ50IGdQ/89TlXb7g1mSj5yI=
 github.com/muleiwu/go-cache v1.1.0 h1:mbMYIB342Q6yK7IyQv15gYLxDL2jU7PCcLDWKnSXvKE=
 github.com/muleiwu/go-cache v1.1.0/go.mod h1:I5Lb8CB31GBUwqo6s+UgBVPhM3Ic34jj1pfxVJqVUn0=
 github.com/muleiwu/golog v1.1.1 h1:jdNaxhVRumfL1d1YjNB7wlJ9MM8fJulxKKYD3fqP1BY=
@@ -100,6 +104,8 @@ github.com/muleiwu/gomander v1.0.0 h1:Ndno1BbueQVVEnenWy/fZtrQRitcUOui8iJY99P/Rr
 github.com/muleiwu/gomander v1.0.0/go.mod h1:Vv+vreRHGcix9ByKxQBvoRRygbqx+kfjyh6YyGFMKVk=
 github.com/muleiwu/gsr v1.0.0 h1:uxEtvj2Yho0okV6xvar6dTVaIoxqJgxkgZNf6xcERj8=
 github.com/muleiwu/gsr v1.0.0/go.mod h1:RJBYRCQ8Gv5OSJVjk38eOoC197KxvAH5pdb0Gatsuos=
+github.com/muleiwu/gsr v1.1.0 h1:9esZfjzDRPpwz4AI5FCCUjhODUmkrkkcpHYdMPgYkrA=
+github.com/muleiwu/gsr v1.1.0/go.mod h1:RJBYRCQ8Gv5OSJVjk38eOoC197KxvAH5pdb0Gatsuos=
 github.com/ncruces/go-strftime v1.0.0 h1:HMFp8mLCTPp341M/ZnA4qaf7ZlsbTc+miZjCLOFAw7w=
 github.com/ncruces/go-strftime v1.0.0/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=

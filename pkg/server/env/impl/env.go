@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cnb.cool/mliev/open/go-web/pkg/helper"
+	"github.com/muleiwu/anyto"
 	"github.com/spf13/viper"
 )
 
@@ -107,98 +108,90 @@ func (receiver *Env) Get(key string, defaultValue any) any {
 
 func (receiver *Env) GetBool(key string, defaultValue bool) bool {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(bool); ok {
-		return str
-	} else if str, ok := val.(string); ok {
-		if strings.ToLower(str) == "true" {
-			return true
-		} else if strings.ToLower(str) == "1" {
-			return true
-		} else if strings.ToLower(str) == "false" {
-			return false
-		} else if strings.ToLower(str) == "0" {
-			return false
-		}
-		return defaultValue
-	} else if str, ok := val.(int); ok {
-		if str == 0 {
-			return false
-		} else if str == 1 {
-			return true
-		}
+	result, err := anyto.Anyto(val).To().ValueE().Bool()
+	if err != nil {
 		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetInt(key string, defaultValue int) int {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(int); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().Int()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetInt32(key string, defaultValue int32) int32 {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(int32); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().Int32()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetInt64(key string, defaultValue int64) int64 {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(int64); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().Int64()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetFloat64(key string, defaultValue float64) float64 {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(float64); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().Float64()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetStringSlice(key string, defaultValue []string) []string {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.([]string); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().StringSlice()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetString(key string, defaultValue string) string {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(string); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().String()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetStringMapString(key string, defaultValue map[string]string) map[string]string {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(map[string]string); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().StringMapString()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetStringMapStringSlice(key string, defaultValue map[string][]string) map[string][]string {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(map[string][]string); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().StringMapStringSlice()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }
 
 func (receiver *Env) GetTime(key string, defaultValue time.Time) time.Time {
 	val := receiver.Get(key, defaultValue)
-	if str, ok := val.(time.Time); ok {
-		return str
+	result, err := anyto.Anyto(val).To().ValueE().Time()
+	if err != nil {
+		return defaultValue
 	}
-	return defaultValue
+	return result
 }

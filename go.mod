@@ -6,10 +6,11 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
+	github.com/muleiwu/anyto v1.1.0
 	github.com/muleiwu/go-cache v1.1.0
 	github.com/muleiwu/golog v1.1.1
 	github.com/muleiwu/gomander v1.0.0
-	github.com/muleiwu/gsr v1.0.0
+	github.com/muleiwu/gsr v1.1.0
 	github.com/redis/go-redis/v9 v9.17.3
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/mysql v1.6.0
