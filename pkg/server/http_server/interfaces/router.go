@@ -4,8 +4,8 @@ import (
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 )
 
-// Context 抽象 HTTP 请求/响应上下文，隐藏底层框架细节
-type Context interface {
+// RouterContextInterface 抽象 HTTP 请求/响应上下文，隐藏底层框架细节
+type RouterContextInterface interface {
 	// 响应
 	JSON(code int, obj any)
 	String(code int, format string, values ...any)
@@ -19,10 +19,10 @@ type Context interface {
 }
 
 // HandlerFunc 是业务 handler 的统一签名，隐藏了 WrapHandler 细节
-type HandlerFunc func(Context, interfaces.HelperInterface)
+type HandlerFunc func(RouterContextInterface, interfaces.HelperInterface)
 
 // MiddlewareFunc 是中间件的统一签名
-type MiddlewareFunc func(Context)
+type MiddlewareFunc func(RouterContextInterface)
 
 // RouterInterface 仿 Gin 路由风格，内部自动 WrapHandler
 type RouterInterface interface {
