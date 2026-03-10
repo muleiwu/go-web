@@ -15,7 +15,7 @@ type HealthController struct {
 }
 
 // GetHealth 健康检查接口
-func (receiver HealthController) GetHealth(c httpInterfaces.Context, helper interfaces.HelperInterface) {
+func (receiver HealthController) GetHealth(c httpInterfaces.RouterContextInterface, helper interfaces.HelperInterface) {
 	healthStatus := dto.HealthStatus{
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
@@ -43,7 +43,7 @@ func (receiver HealthController) GetHealth(c httpInterfaces.Context, helper inte
 }
 
 // GetHealthSimple 简单健康检查接口
-func (receiver HealthController) GetHealthSimple(c httpInterfaces.Context, helper interfaces.HelperInterface) {
+func (receiver HealthController) GetHealthSimple(c httpInterfaces.RouterContextInterface, helper interfaces.HelperInterface) {
 	var baseResponse BaseResponse
 	baseResponse.Success(c, map[string]any{
 		"status":    "UP",

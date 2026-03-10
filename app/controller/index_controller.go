@@ -11,7 +11,7 @@ type IndexController struct {
 	BaseResponse
 }
 
-func (receiver IndexController) GetIndex(c httpInterfaces.Context, helper interfaces.HelperInterface) {
+func (receiver IndexController) GetIndex(c httpInterfaces.RouterContextInterface, helper interfaces.HelperInterface) {
 	helper.GetLogger().Info("hello world")
 	c.String(http.StatusOK, "你好, 世界")
 }

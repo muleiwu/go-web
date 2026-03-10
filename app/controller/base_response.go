@@ -12,7 +12,7 @@ type BaseResponse struct {
 }
 
 // Success 成功响应
-func (receiver BaseResponse) Success(c httpInterfaces.Context, data any) {
+func (receiver BaseResponse) Success(c httpInterfaces.RouterContextInterface, data any) {
 	c.JSON(http.StatusOK, dto.Response{
 		Code:    constants.ErrCodeSuccess,
 		Message: constants.GetErrMessage(constants.ErrCodeSuccess),
@@ -21,7 +21,7 @@ func (receiver BaseResponse) Success(c httpInterfaces.Context, data any) {
 }
 
 // SuccessWithMessage 带自定义消息的成功响应
-func (receiver BaseResponse) SuccessWithMessage(c httpInterfaces.Context, message string, data any) {
+func (receiver BaseResponse) SuccessWithMessage(c httpInterfaces.RouterContextInterface, message string, data any) {
 	c.JSON(http.StatusOK, dto.Response{
 		Code:    constants.ErrCodeSuccess,
 		Message: message,
@@ -30,7 +30,7 @@ func (receiver BaseResponse) SuccessWithMessage(c httpInterfaces.Context, messag
 }
 
 // Error 错误响应
-func (receiver BaseResponse) Error(c httpInterfaces.Context, code int, message string) {
+func (receiver BaseResponse) Error(c httpInterfaces.RouterContextInterface, code int, message string) {
 	httpStatus := receiver.getHTTPStatus(code)
 	if message == "" {
 		message = constants.GetErrMessage(code)
@@ -43,7 +43,7 @@ func (receiver BaseResponse) Error(c httpInterfaces.Context, code int, message s
 }
 
 // ErrorWithData 带数据的错误响应
-func (receiver BaseResponse) ErrorWithData(c httpInterfaces.Context, code int, message string, data any) {
+func (receiver BaseResponse) ErrorWithData(c httpInterfaces.RouterContextInterface, code int, message string, data any) {
 	httpStatus := receiver.getHTTPStatus(code)
 	if message == "" {
 		message = constants.GetErrMessage(code)
