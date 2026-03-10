@@ -6,6 +6,7 @@ import (
 
 	helper2 "cnb.cool/mliev/open/go-web/pkg/helper"
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/muleiwu/gsr"
 )
@@ -28,7 +29,7 @@ func NewHttpDeps(helper interfaces.HelperInterface, engine *gin.Engine) *HttpDep
 
 // WrapHandler 使用闭包包装处理函数，同时将真实 handler 名称存入 lastHandlerName
 // 供 DebugPrintRouteFunc 使用。
-func (d *HttpDeps) WrapHandler(handler func(*gin.Context, interfaces.HelperInterface)) gin.HandlerFunc {
+func (d *HttpDeps) WrapHandler(handler httpInterfaces.HandlerFunc) gin.HandlerFunc {
 	lastHandlerName = runtime.FuncForPC(reflect.ValueOf(handler).Pointer()).Name()
 	return func(c *gin.Context) {
 		handler(c, d.getHttpDeps(d.getTraceId(c)))

@@ -7,7 +7,7 @@ import (
 	"cnb.cool/mliev/open/go-web/app/constants"
 	"cnb.cool/mliev/open/go-web/app/dto"
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-	"github.com/gin-gonic/gin"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 )
 
 type HealthController struct {
@@ -15,11 +15,11 @@ type HealthController struct {
 }
 
 // GetHealth 健康检查接口
-func (receiver HealthController) GetHealth(c *gin.Context, helper interfaces.HelperInterface) {
+func (receiver HealthController) GetHealth(c httpInterfaces.Context, helper interfaces.HelperInterface) {
 	healthStatus := dto.HealthStatus{
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
-		Services:  make(map[string]interface{}),
+		Services:  make(map[string]any),
 	}
 
 	// 检查数据库连接
@@ -43,9 +43,9 @@ func (receiver HealthController) GetHealth(c *gin.Context, helper interfaces.Hel
 }
 
 // GetHealthSimple 简单健康检查接口
-func (receiver HealthController) GetHealthSimple(c *gin.Context, helper interfaces.HelperInterface) {
+func (receiver HealthController) GetHealthSimple(c httpInterfaces.Context, helper interfaces.HelperInterface) {
 	var baseResponse BaseResponse
-	baseResponse.Success(c, gin.H{
+	baseResponse.Success(c, map[string]any{
 		"status":    "UP",
 		"timestamp": time.Now().Unix(),
 	})

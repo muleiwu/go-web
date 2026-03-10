@@ -5,14 +5,14 @@ import (
 
 	"cnb.cool/mliev/open/go-web/app/constants"
 	"cnb.cool/mliev/open/go-web/app/dto"
-	"github.com/gin-gonic/gin"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 )
 
 type BaseResponse struct {
 }
 
 // Success 成功响应
-func (receiver BaseResponse) Success(c *gin.Context, data any) {
+func (receiver BaseResponse) Success(c httpInterfaces.Context, data any) {
 	c.JSON(http.StatusOK, dto.Response{
 		Code:    constants.ErrCodeSuccess,
 		Message: constants.GetErrMessage(constants.ErrCodeSuccess),
@@ -21,7 +21,7 @@ func (receiver BaseResponse) Success(c *gin.Context, data any) {
 }
 
 // SuccessWithMessage 带自定义消息的成功响应
-func (receiver BaseResponse) SuccessWithMessage(c *gin.Context, message string, data any) {
+func (receiver BaseResponse) SuccessWithMessage(c httpInterfaces.Context, message string, data any) {
 	c.JSON(http.StatusOK, dto.Response{
 		Code:    constants.ErrCodeSuccess,
 		Message: message,
@@ -30,7 +30,7 @@ func (receiver BaseResponse) SuccessWithMessage(c *gin.Context, message string, 
 }
 
 // Error 错误响应
-func (receiver BaseResponse) Error(c *gin.Context, code int, message string) {
+func (receiver BaseResponse) Error(c httpInterfaces.Context, code int, message string) {
 	httpStatus := receiver.getHTTPStatus(code)
 	if message == "" {
 		message = constants.GetErrMessage(code)
@@ -43,7 +43,7 @@ func (receiver BaseResponse) Error(c *gin.Context, code int, message string) {
 }
 
 // ErrorWithData 带数据的错误响应
-func (receiver BaseResponse) ErrorWithData(c *gin.Context, code int, message string, data any) {
+func (receiver BaseResponse) ErrorWithData(c httpInterfaces.Context, code int, message string, data any) {
 	httpStatus := receiver.getHTTPStatus(code)
 	if message == "" {
 		message = constants.GetErrMessage(code)

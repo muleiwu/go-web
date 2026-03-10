@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-	"github.com/gin-gonic/gin"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 )
 
 type IndexController struct {
 	BaseResponse
 }
 
-func (receiver IndexController) GetIndex(c *gin.Context, helper interfaces.HelperInterface) {
+func (receiver IndexController) GetIndex(c httpInterfaces.Context, helper interfaces.HelperInterface) {
 	helper.GetLogger().Info("hello world")
 	c.String(http.StatusOK, "你好, 世界")
 }

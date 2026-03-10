@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/muleiwu/golog"
@@ -87,11 +88,8 @@ func (receiver *HttpServer) RunHttp() {
 	receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d 个", len(middlewareFuncList)))
 
 	deps := NewHttpDeps(receiver.Helper, engine)
-	header := receiver.Helper.GetConfig().Get("http.router", func(router *gin.Engine, deps *HttpDeps) {
-
-	}).(func(*gin.Engine, *HttpDeps))
-
-	header(engine, deps)
+	routerFunc := receiver.Helper.GetConfig().Get("http.router", func(r httpInterfaces.RouterInterface) {}).(func(httpInterfaces.RouterInterface))
+	routerFunc(NewRouter(engine, deps))
 
 	//receiver.routerFunc(engine)
 

@@ -3,8 +3,7 @@ package autoload
 import (
 	"cnb.cool/mliev/open/go-web/app/controller"
 	envInterface "cnb.cool/mliev/open/go-web/pkg/interfaces"
-	"cnb.cool/mliev/open/go-web/pkg/server/http_server/impl"
-	"github.com/gin-gonic/gin"
+	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 )
 
 type Router struct {
@@ -12,18 +11,14 @@ type Router struct {
 
 func (receiver Router) InitConfig(helper envInterface.HelperInterface) map[string]any {
 	return map[string]any{
-		"http.router": func(router *gin.Engine, deps *impl.HttpDeps) {
-
+		"http.router": func(router httpInterfaces.RouterInterface) {
 			// 首页
-			router.GET("/", deps.WrapHandler(controller.IndexController{}.GetIndex))
+			router.GET("/", controller.IndexController{}.GetIndex)
 
 			health := router.Group("/health")
-			{
-				// 健康检查接口
-				health.GET("", deps.WrapHandler(controller.HealthController{}.GetHealth))
-				health.GET("/simple", deps.WrapHandler(controller.HealthController{}.GetHealthSimple))
-			}
-
+			// 健康检查接口
+			health.GET("", controller.HealthController{}.GetHealth)
+			health.GET("/simple", controller.HealthController{}.GetHealthSimple)
 		},
 	}
 }
