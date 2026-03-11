@@ -49,6 +49,10 @@ func (r *Router) Group(path string) httpInterfaces.RouterInterface {
 	}
 }
 
+func (r *Router) RegexGroup(prefix string) httpInterfaces.RegexRouterInterface {
+	return &RegexRouter{prefix: prefix, router: r}
+}
+
 func (r *Router) Use(middleware ...httpInterfaces.MiddlewareFunc) {
 	handlers := make([]gin.HandlerFunc, len(middleware))
 	for i, m := range middleware {
