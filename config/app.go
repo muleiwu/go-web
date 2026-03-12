@@ -37,29 +37,25 @@ func (a App) migrations() []any {
 }
 
 // Assemblies 返回标准装配链（env -> config -> logger -> database -> redis -> cache）。
-func (a App) Assemblies(helper interfaces.HelperInterface) []interfaces.AssemblyInterface {
+func (a App) Assemblies() []interfaces.AssemblyInterface {
 	return []interfaces.AssemblyInterface{
-		&envAssembly.Env{Helper: helper},
+		&envAssembly.Env{},
 		&configAssembly.Config{
-			Helper:         helper,
 			DefaultConfigs: a.configs(),
 		},
-		&loggerAssembly.Logger{Helper: helper},
-		&databaseAssembly.Database{Helper: helper},
-		&redisAssembly.Redis{Helper: helper},
-		&cacheAssembly.Cache{Helper: helper},
+		&loggerAssembly.Logger{},
+		&databaseAssembly.Database{},
+		&redisAssembly.Redis{},
+		&cacheAssembly.Cache{},
 	}
 }
 
 // Servers 返回标准服务链（migration + http_server）。
-func (a App) Servers(helper interfaces.HelperInterface) []interfaces.ServerInterface {
+func (a App) Servers() []interfaces.ServerInterface {
 	return []interfaces.ServerInterface{
 		&migration.Migration{
-			Helper:    helper,
 			Migration: a.migrations(),
 		},
-		&service.HttpServer{
-			Helper: helper,
-		},
+		&service.HttpServer{},
 	}
 }

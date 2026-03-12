@@ -8,17 +8,13 @@ import (
 )
 
 type Server struct {
-	Helper interfaces.HelperInterface
 }
 
 func (receiver Server) Get() []interfaces.ServerInterface {
 	return []interfaces.ServerInterface{
 		&migration.Migration{
-			Helper:    receiver.Helper,
 			Migration: autoload.Migration{}.Get(),
 		},
-		&service.HttpServer{
-			Helper: receiver.Helper,
-		},
+		&service.HttpServer{},
 	}
 }

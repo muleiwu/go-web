@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	envInterface "cnb.cool/mliev/open/go-web/pkg/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +31,7 @@ func DefaultCorsConfig() CorsConfig {
 }
 
 // CorsMiddleware 使用默认配置创建CORS中间件
-func CorsMiddleware(helper envInterface.HelperInterface) gin.HandlerFunc {
+func CorsMiddleware() gin.HandlerFunc {
 	return CorsWithConfig(DefaultCorsConfig())
 }
 

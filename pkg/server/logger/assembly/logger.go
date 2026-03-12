@@ -3,21 +3,25 @@ package assembly
 import (
 	"fmt"
 
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-	"cnb.cool/mliev/open/go-web/pkg/server/logger/impl"
+	"cnb.cool/mliev/open/go-web/pkg/container"
+	loggerDriver "cnb.cool/mliev/open/go-web/pkg/server/logger/driver"
+	"github.com/muleiwu/gsr"
 )
 
 // Logger is the assembly component responsible for initializing the logger driver.
 type Logger struct {
-	Helper interfaces.HelperInterface
 }
 
 func (receiver *Logger) Assembly() error {
-	mode := receiver.Helper.GetConfig().GetString("app.mode", "debug")
-	logger, err := impl.NewLogger(mode)
+	config := container.MustGet[gsr.Provider]("config")
+	mode := config.GetString("app.mode", "debug")
+
+	// 使用 DriverManager 创建日志驱动
+	logger, err := loggerDriver.LoggerDriverManager.Make(mode, nil)
 	if err != nil {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
-	receiver.Helper.SetLogger(logger)
+
+	container.Register(container.NewSimpleProvider("logger", logger))
 	return nil
 }

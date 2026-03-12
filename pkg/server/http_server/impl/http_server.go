@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/container"
 	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,35 +22,42 @@ import (
 )
 
 type HttpServer struct {
-	Helper     interfaces.HelperInterface
-	routerFunc func(router *gin.Engine)
-	server     *http.Server
+	server *http.Server
 }
 
-func NewHttpServer(helper interfaces.HelperInterface) *HttpServer {
-	return &HttpServer{
-		Helper: helper,
-	}
+func NewHttpServer() *HttpServer {
+	return &HttpServer{}
+}
+
+func (receiver *HttpServer) getConfig() gsr.Provider {
+	return container.MustGet[gsr.Provider]("config")
+}
+
+func (receiver *HttpServer) getLogger() gsr.Logger {
+	return container.MustGet[gsr.Logger]("logger")
 }
 
 // RunHttp 启动HTTP服务器并注册路由和中间件
 func (receiver *HttpServer) RunHttp() {
+	config := receiver.getConfig()
+	logger := receiver.getLogger()
+
 	// 设置Gin模式
-	if receiver.Helper.GetConfig().GetString("http.mode", "") == "release" {
+	if config.GetString("http.mode", "") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// 将 Gin 内部调试日志重定向到 golog
 	gin.DisableConsoleColor()
-	gin.DefaultWriter = &gologWriter{logger: receiver.Helper.GetLogger()}
-	gin.DefaultErrorWriter = &gologWriter{logger: receiver.Helper.GetLogger(), isError: true}
+	gin.DefaultWriter = &gologWriter{logger: logger}
+	gin.DefaultErrorWriter = &gologWriter{logger: logger, isError: true}
 
 	// 自定义路由注册日志，显示真实控制器方法名而非 WrapHandler.func1
 	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
 		if lastHandlerName != "" {
 			handlerName = lastHandlerName
 		}
-		receiver.Helper.GetLogger().Info("路由注册",
+		logger.Info("路由注册",
 			golog.Field("method", httpMethod),
 			golog.Field("path", absolutePath),
 			golog.Field("handler", handlerName),
@@ -76,25 +83,22 @@ func (receiver *HttpServer) RunHttp() {
 	receiver.loadWebStatic(engine)
 
 	// 注册中间件
-	//handlerFuncs := config.MiddlewareConfig{}.Get()
-	middlewareFuncList := receiver.Helper.GetConfig().Get("http.middleware", []gin.HandlerFunc{}).([]gin.HandlerFunc)
+	middlewareFuncList := config.Get("http.middleware", []gin.HandlerFunc{}).([]gin.HandlerFunc)
 	for _, handlerFunc := range middlewareFuncList {
 		if handlerFunc == nil {
 			continue
 		}
 		engine.Use(handlerFunc)
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %s", receiver.GetFunctionName(handlerFunc)))
+		logger.Info(fmt.Sprintf("注册中间件: %s", receiver.GetFunctionName(handlerFunc)))
 	}
-	receiver.Helper.GetLogger().Info(fmt.Sprintf("注册中间件: %d 个", len(middlewareFuncList)))
+	logger.Info(fmt.Sprintf("注册中间件: %d 个", len(middlewareFuncList)))
 
-	deps := NewHttpDeps(receiver.Helper, engine)
-	routerFunc := receiver.Helper.GetConfig().Get("http.router", func(r httpInterfaces.RouterInterface) {}).(func(httpInterfaces.RouterInterface))
+	deps := NewHttpDeps()
+	routerFunc := config.Get("http.router", func(r httpInterfaces.RouterInterface) {}).(func(httpInterfaces.RouterInterface))
 	routerFunc(NewRouter(engine, deps))
 
-	//receiver.routerFunc(engine)
-
 	// 创建一个HTTP服务器，以便能够优雅关闭
-	addr := receiver.Helper.GetConfig().GetString("http.addr", ":8080")
+	addr := config.GetString("http.addr", ":8080")
 	receiver.server = &http.Server{
 		Addr:    addr,
 		Handler: engine,
@@ -102,9 +106,9 @@ func (receiver *HttpServer) RunHttp() {
 
 	// 在单独的goroutine中启动服务器
 	go func() {
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("服务器启动于 %s", addr))
+		logger.Info(fmt.Sprintf("服务器启动于 %s", addr))
 		if err := receiver.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			receiver.Helper.GetLogger().Error(fmt.Sprintf("启动服务器失败: %v", err))
+			logger.Error(fmt.Sprintf("启动服务器失败: %v", err))
 		}
 	}()
 }
@@ -115,7 +119,7 @@ func (receiver *HttpServer) Stop() error {
 		return nil
 	}
 
-	receiver.Helper.GetLogger().Info("正在关闭HTTP服务器...")
+	receiver.getLogger().Info("正在关闭HTTP服务器...")
 
 	// 创建一个5秒的上下文用于超时控制
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -123,21 +127,24 @@ func (receiver *HttpServer) Stop() error {
 
 	// 优雅地关闭服务器
 	if err := receiver.server.Shutdown(ctx); err != nil {
-		receiver.Helper.GetLogger().Error(fmt.Sprintf("HTTP服务器关闭失败: %v", err))
+		receiver.getLogger().Error(fmt.Sprintf("HTTP服务器关闭失败: %v", err))
 		return err
 	}
 
-	receiver.Helper.GetLogger().Info("HTTP服务器已优雅关闭")
+	receiver.getLogger().Info("HTTP服务器已优雅关闭")
 	return nil
 }
 
 // loadTemplates 加载模板到Gin引擎
 func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
-	staticFs := receiver.Helper.GetConfig().Get("static.fs", map[string]embed.FS{}).(map[string]embed.FS)
+	config := receiver.getConfig()
+	logger := receiver.getLogger()
 
-	receiver.Helper.GetLogger().Info(fmt.Sprintf("加载静态文件系统, 键数量: %d", len(staticFs)))
+	staticFs := config.Get("static.fs", map[string]embed.FS{}).(map[string]embed.FS)
+
+	logger.Info(fmt.Sprintf("加载静态文件系统, 键数量: %d", len(staticFs)))
 	for key := range staticFs {
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 静态文件系统键: %s", key))
+		logger.Info(fmt.Sprintf("  - 静态文件系统键: %s", key))
 	}
 
 	templates, ok := staticFs["templates"]
@@ -160,7 +167,7 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 		}
 		if !d.IsDir() && len(path) > 5 && path[len(path)-5:] == ".html" {
 			templateFiles = append(templateFiles, path)
-			receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 找到模板文件: %s", path))
+			logger.Info(fmt.Sprintf("  - 找到模板文件: %s", path))
 		}
 		return nil
 	})
@@ -169,11 +176,11 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 	}
 
 	if len(templateFiles) == 0 {
-		receiver.Helper.GetLogger().Warn("没有找到任何模板文件")
+		logger.Warn("没有找到任何模板文件")
 		return nil
 	}
 
-	receiver.Helper.GetLogger().Info(fmt.Sprintf("共找到 %d 个模板文件", len(templateFiles)))
+	logger.Info(fmt.Sprintf("共找到 %d 个模板文件", len(templateFiles)))
 
 	// 创建模板实例，手动解析每个文件并保留完整路径作为模板名称
 	tmpl := template.New("")
@@ -190,25 +197,25 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 			return fmt.Errorf("解析模板文件 %s 失败: %v", file, err)
 		}
 
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 解析模板: %s", file))
+		logger.Info(fmt.Sprintf("  - 解析模板: %s", file))
 	}
 
 	// 列出所有已定义的模板
-	receiver.Helper.GetLogger().Info("已定义的模板:")
+	logger.Info("已定义的模板:")
 	for _, t := range tmpl.Templates() {
-		receiver.Helper.GetLogger().Info(fmt.Sprintf("  - 模板名称: %s", t.Name()))
+		logger.Info(fmt.Sprintf("  - 模板名称: %s", t.Name()))
 	}
 
 	// 设置HTML模板
 	engine.SetHTMLTemplate(tmpl)
 
-	receiver.Helper.GetLogger().Info("模板加载成功")
+	logger.Info("模板加载成功")
 
 	return nil
 }
 
 func (receiver *HttpServer) loadWebStatic(engine *gin.Engine) {
-	staticHandler := NewStaticHandler(receiver.Helper, engine)
+	staticHandler := NewStaticHandler(engine)
 	staticHandler.setupStaticFileServers()
 }
 
@@ -260,7 +267,7 @@ func (receiver *HttpServer) ginLogger() gin.HandlerFunc {
 
 		// 请求处理完成后记录日志
 		cost := time.Since(start)
-		zapLogger := receiver.Helper.GetLogger()
+		zapLogger := receiver.getLogger()
 
 		// 根据状态码决定日志级别
 		statusCode := c.Writer.Status()

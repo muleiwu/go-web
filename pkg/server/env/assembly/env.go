@@ -1,16 +1,15 @@
 package assembly
 
 import (
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/container"
 	"cnb.cool/mliev/open/go-web/pkg/server/env/impl"
 )
 
 type Env struct {
-	Helper interfaces.HelperInterface
 }
 
 func (receiver *Env) Assembly() error {
-	receiver.Helper.SetEnv(impl.NewEnv())
-
+	env := impl.NewEnv()
+	container.Register(container.NewSimpleProvider("env", env))
 	return nil
 }

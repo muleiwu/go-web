@@ -1,12 +1,16 @@
 package autoload
 
-import envInterface "cnb.cool/mliev/open/go-web/pkg/interfaces"
+import (
+	"cnb.cool/mliev/open/go-web/pkg/container"
+	"github.com/muleiwu/gsr"
+)
 
 type Cache struct {
 }
 
-func (receiver Cache) InitConfig(helper envInterface.HelperInterface) map[string]any {
+func (receiver Cache) InitConfig() map[string]any {
+	env := container.MustGet[gsr.Enver]("env")
 	return map[string]any{
-		"cache.driver": helper.GetEnv().GetString("database.driver", "none"), // memory,redis,none
+		"cache.driver": env.GetString("cache.driver", "none"), // memory,redis,none
 	}
 }
