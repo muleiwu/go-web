@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"embed"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,15 +14,23 @@ import (
 )
 
 // Start 启动应用程序。
-// staticFs 为嵌入的静态资源文件系统（templates、static 等）。
-// app 为 AppProvider 实现，由调用方（go-web 自身或子项目）传入，
-// 用于提供自定义的装配链和服务链。
-func Start(staticFs map[string]embed.FS, app interfaces.AppProvider) {
+// 通过 functional options 模式传入配置，例如：
+//
+//	cmd.Start(
+//	    cmd.WithStaticFs(thatFs),
+//	    cmd.WithApp(config.App{}),
+//	)
+func Start(opts ...Option) {
+	o := &Options{}
+	for _, fn := range opts {
+		fn(o)
+	}
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	for {
-		servers := initializeServices(staticFs, app)
+		servers := initializeServices(o)
 
 		select {
 		case sig := <-sigChan:
@@ -31,7 +38,7 @@ func Start(staticFs map[string]embed.FS, app interfaces.AppProvider) {
 			case syscall.SIGHUP:
 				getLogger().Info("收到 SIGHUP 信号，开始重启服务...")
 				stopServices(servers)
-				reloadConfiguration(app)
+				reloadConfiguration(o)
 				getLogger().Info("正在重新启动服务...")
 				time.Sleep(100 * time.Millisecond)
 				continue
@@ -46,7 +53,7 @@ func Start(staticFs map[string]embed.FS, app interfaces.AppProvider) {
 		case <-reload.GetReloadChan():
 			getLogger().Info("收到重启请求，开始重启服务...")
 			stopServices(servers)
-			reloadConfiguration(app)
+			reloadConfiguration(o)
 			getLogger().Info("正在重新启动服务...")
 			time.Sleep(100 * time.Millisecond)
 			continue
@@ -54,8 +61,8 @@ func Start(staticFs map[string]embed.FS, app interfaces.AppProvider) {
 	}
 }
 
-func initializeServices(staticFs map[string]embed.FS, app interfaces.AppProvider) []interfaces.ServerInterface {
-	for _, a := range app.Assemblies() {
+func initializeServices(o *Options) []interfaces.ServerInterface {
+	for _, a := range o.App.Assemblies() {
 		if err := a.Assembly(); err != nil {
 			fmt.Printf("Error assembling: %v\n", err)
 		}
@@ -64,10 +71,10 @@ func initializeServices(staticFs map[string]embed.FS, app interfaces.AppProvider
 	// 将静态资源 FS 注入到 config 中
 	config, err := container.Get[gsr.Provider]("config")
 	if err == nil {
-		config.Set("static.fs", staticFs)
+		config.Set("static.fs", o.StaticFs)
 	}
 
-	servers := app.Servers()
+	servers := o.App.Servers()
 	for _, s := range servers {
 		if err := s.Run(); err != nil {
 			getLogger().Error(err.Error())
@@ -87,13 +94,13 @@ func stopServices(servers []interfaces.ServerInterface) {
 	getLogger().Info("所有服务已停止")
 }
 
-func reloadConfiguration(app interfaces.AppProvider) {
+func reloadConfiguration(o *Options) {
 	getLogger().Info("正在重新加载配置...")
 
 	// 重置 container 中的服务，使其重新创建
 	container.ResetAll()
 
-	for _, a := range app.Assemblies() {
+	for _, a := range o.App.Assemblies() {
 		if err := a.Assembly(); err != nil {
 			getLogger().Error(fmt.Sprintf("重新装配服务失败: %v", err))
 		}
