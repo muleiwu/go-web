@@ -14,10 +14,12 @@ func (receiver Router) InitConfig() map[string]any {
 			// 首页
 			router.GET("/", controller.IndexController{}.GetIndex)
 
-			health := router.Group("/health")
 			// 健康检查接口
-			health.GET("", controller.HealthController{}.GetHealth)
-			health.GET("/simple", controller.HealthController{}.GetHealthSimple)
+			health := router.Group("/health")
+			{
+				health.GET("", controller.HealthController{}.GetHealth)
+				health.GET("/simple", controller.HealthController{}.GetHealthSimple)
+			}
 		},
 	}
 }
