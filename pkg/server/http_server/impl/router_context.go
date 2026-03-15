@@ -8,15 +8,27 @@ type routerContext struct {
 	*gin.Context
 }
 
-func (rc *routerContext) Set(key any, value any) {
-	rc.Context.Set(key.(string), value)
+func (rc *routerContext) Set(key string, value any) {
+	rc.Context.Set(key, value)
 }
 
-func (rc *routerContext) Get(key any) any {
-	v, _ := rc.Context.Get(key.(string))
+func (rc *routerContext) Get(key string) any {
+	v, _ := rc.Context.Get(key)
 	return v
 }
 
-func (rc *routerContext) GetString(key any) string {
-	return rc.Context.GetString(key.(string))
+func (rc *routerContext) GetString(key string) string {
+	return rc.Context.GetString(key)
+}
+
+func (rc *routerContext) GetHeader(key string) string {
+	return rc.Context.GetHeader(key)
+}
+
+func (rc *routerContext) SetHeader(key, value string) {
+	rc.Context.Writer.Header().Set(key, value)
+}
+
+func (rc *routerContext) Method() string {
+	return rc.Context.Request.Method
 }

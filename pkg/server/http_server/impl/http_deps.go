@@ -11,12 +11,8 @@ import (
 	"github.com/muleiwu/gsr"
 )
 
-// lastHandlerName holds the real controller method name resolved just before
-// WrapHandler returns its closure. Route registration is synchronous so this
-// is safe without a mutex.
-var lastHandlerName string
-
 type HttpDeps struct {
+	LastHandlerName string
 }
 
 func NewHttpDeps() *HttpDeps {
@@ -27,7 +23,7 @@ func NewHttpDeps() *HttpDeps {
 // 供 DebugPrintRouteFunc 使用。
 // 在调用 handler 之前，将请求级 logger（带 traceId）写入上下文。
 func (d *HttpDeps) WrapHandler(handler httpInterfaces.HandlerFunc) gin.HandlerFunc {
-	lastHandlerName = runtime.FuncForPC(reflect.ValueOf(handler).Pointer()).Name()
+	d.LastHandlerName = runtime.FuncForPC(reflect.ValueOf(handler).Pointer()).Name()
 	return func(c *gin.Context) {
 		// 将请求级 logger 存入上下文
 		traceId := c.GetString("traceId")

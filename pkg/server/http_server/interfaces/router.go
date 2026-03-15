@@ -6,11 +6,16 @@ type RouterContextInterface interface {
 	JSON(code int, obj any)
 	String(code int, format string, values ...any)
 	// 值存取
-	Set(key any, value any)
-	Get(key any) any
-	GetString(key any) string
+	Set(key string, value any)
+	Get(key string) any
+	GetString(key string) string
 	// 路径参数（含正则命名捕获组）
 	Param(key string) string
+	// HTTP 头部
+	GetHeader(key string) string
+	SetHeader(key, value string)
+	// HTTP 方法
+	Method() string
 	// 流程控制
 	Next()
 	Abort()

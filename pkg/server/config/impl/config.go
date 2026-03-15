@@ -1,12 +1,14 @@
 package impl
 
 import (
+	"sync"
 	"time"
 
 	"github.com/muleiwu/anyto"
 )
 
 type Config struct {
+	mu   sync.RWMutex
 	data map[string]any
 }
 
@@ -15,17 +17,19 @@ func NewConfig() *Config {
 }
 
 func (c *Config) Set(key string, value any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.data[key] = value
 }
 
 func (c *Config) Get(key string, defaultValue any) any {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	data, ok := c.data[key]
-
 	if !ok {
 		return defaultValue
 	}
-
 	return data
 }
 

@@ -33,19 +33,16 @@ func (receiver HealthController) GetHealth(c httpInterfaces.RouterContextInterfa
 	// 如果任何服务不健康，整体状态设为DOWN
 	if dbStatus.Status == "DOWN" || redisStatus.Status == "DOWN" {
 		healthStatus.Status = "DOWN"
-		var baseResponse BaseResponse
-		baseResponse.Error(c, constants.ErrCodeUnavailable, "服务不健康")
+		receiver.Error(c, constants.ErrCodeUnavailable, "服务不健康")
 		return
 	}
 
-	var baseResponse BaseResponse
-	baseResponse.Success(c, healthStatus)
+	receiver.Success(c, healthStatus)
 }
 
 // GetHealthSimple 简单健康检查接口
 func (receiver HealthController) GetHealthSimple(c httpInterfaces.RouterContextInterface) {
-	var baseResponse BaseResponse
-	baseResponse.Success(c, map[string]any{
+	receiver.Success(c, map[string]any{
 		"status":    "UP",
 		"timestamp": time.Now().Unix(),
 	})

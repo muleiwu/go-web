@@ -10,9 +10,32 @@ import (
 var global = NewContainer()
 
 type entry struct {
+	mu       sync.Mutex
+	done     bool
 	provider Provider
 	instance any
-	once     sync.Once
+}
+
+// resolve 执行懒加载初始化，失败时允许重试
+func (e *entry) resolve(name string) (any, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	if e.done {
+		return e.instance, nil
+	}
+
+	inst := e.provider.Build()
+	if init, ok := inst.(Initializable); ok {
+		if err := init.Init(); err != nil {
+			return nil, fmt.Errorf("init %s failed: %w", name, err)
+		}
+	}
+
+	e.instance = inst
+	e.done = true
+	fmt.Printf("[Container] Instantiated: %s\n", name)
+	return e.instance, nil
 }
 
 type Container struct {
@@ -79,18 +102,13 @@ func getFromContainer[T any](c *Container, name string) (T, error) {
 		return zero, fmt.Errorf("provider %q not found", name)
 	}
 
-	// 懒加载，只初始化一次
-	e.once.Do(func() {
-		e.instance = e.provider.Build()
-		if init, ok := e.instance.(Initializable); ok {
-			if err := init.Init(); err != nil {
-				panic(fmt.Sprintf("init %s failed: %v", name, err))
-			}
-		}
-		fmt.Printf("[Container] Instantiated: %s\n", name)
-	})
+	// 懒加载，失败可重试
+	inst, err := e.resolve(name)
+	if err != nil {
+		return zero, err
+	}
 
-	val, ok := e.instance.(T)
+	val, ok := inst.(T)
 	if !ok {
 		return zero, fmt.Errorf("provider %q type mismatch", name)
 	}
@@ -137,19 +155,17 @@ func (c *Container) Inject(target any) error {
 		}
 
 		// 触发懒加载
-		e.once.Do(func() {
-			e.instance = e.provider.Build()
-			if init, ok := e.instance.(Initializable); ok {
-				_ = init.Init()
-			}
-		})
+		inst, err := e.resolve(tag)
+		if err != nil {
+			return fmt.Errorf("inject field %s: %w", field.Name, err)
+		}
 
 		fv := val.Field(i)
 		if !fv.CanSet() {
 			return fmt.Errorf("field %s is not settable", field.Name)
 		}
 
-		iv := reflect.ValueOf(e.instance)
+		iv := reflect.ValueOf(inst)
 		if !iv.Type().AssignableTo(fv.Type()) {
 			return fmt.Errorf("field %s: type %v not assignable to %v", field.Name, iv.Type(), fv.Type())
 		}

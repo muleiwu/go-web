@@ -52,10 +52,12 @@ func (receiver *HttpServer) RunHttp() {
 	gin.DefaultWriter = &gologWriter{logger: logger}
 	gin.DefaultErrorWriter = &gologWriter{logger: logger, isError: true}
 
+	deps := NewHttpDeps()
+
 	// 自定义路由注册日志，显示真实控制器方法名而非 WrapHandler.func1
 	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
-		if lastHandlerName != "" {
-			handlerName = lastHandlerName
+		if deps.LastHandlerName != "" {
+			handlerName = deps.LastHandlerName
 		}
 		logger.Info("路由注册",
 			golog.Field("method", httpMethod),
@@ -83,17 +85,16 @@ func (receiver *HttpServer) RunHttp() {
 	receiver.loadWebStatic(engine)
 
 	// 注册中间件
-	middlewareFuncList := config.Get("http.middleware", []gin.HandlerFunc{}).([]gin.HandlerFunc)
-	for _, handlerFunc := range middlewareFuncList {
-		if handlerFunc == nil {
+	middlewareFuncList := config.Get("http.middleware", []httpInterfaces.MiddlewareFunc{}).([]httpInterfaces.MiddlewareFunc)
+	for _, mw := range middlewareFuncList {
+		if mw == nil {
 			continue
 		}
-		engine.Use(handlerFunc)
-		logger.Info(fmt.Sprintf("注册中间件: %s", receiver.GetFunctionName(handlerFunc)))
+		fn := mw
+		engine.Use(func(c *gin.Context) { fn(&routerContext{c}) })
+		logger.Info(fmt.Sprintf("注册中间件: %s", receiver.GetFunctionName(fn)))
 	}
 	logger.Info(fmt.Sprintf("注册中间件: %d 个", len(middlewareFuncList)))
-
-	deps := NewHttpDeps()
 	routerFunc := config.Get("http.router", func(r httpInterfaces.RouterInterface) {}).(func(httpInterfaces.RouterInterface))
 	routerFunc(NewRouter(engine, deps))
 
@@ -271,40 +272,23 @@ func (receiver *HttpServer) ginLogger() gin.HandlerFunc {
 
 		// 根据状态码决定日志级别
 		statusCode := c.Writer.Status()
+		fields := []gsr.LoggerField{
+			golog.Field("traceId", traceId),
+			golog.Field("method", c.Request.Method),
+			golog.Field("path", path),
+			golog.Field("query", query),
+			golog.Field("status", statusCode),
+			golog.Field("ip", c.ClientIP()),
+			golog.Field("latency", cost),
+			golog.Field("user-agent", c.Request.UserAgent()),
+		}
 		if statusCode >= 500 {
-			zapLogger.Error("请求处理",
-				golog.Field("traceId", traceId),
-				golog.Field("method", c.Request.Method),
-				golog.Field("path", path),
-				golog.Field("query", query),
-				golog.Field("status", statusCode),
-				golog.Field("ip", c.ClientIP()),
-				golog.Field("latency", cost),
-				golog.Field("user-agent", c.Request.UserAgent()),
-				golog.Field("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			)
+			fields = append(fields, golog.Field("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()))
+			zapLogger.Error("请求处理", fields...)
 		} else if statusCode >= 400 {
-			zapLogger.Warn("请求处理",
-				golog.Field("traceId", traceId),
-				golog.Field("method", c.Request.Method),
-				golog.Field("path", path),
-				golog.Field("query", query),
-				golog.Field("status", statusCode),
-				golog.Field("ip", c.ClientIP()),
-				golog.Field("latency", cost),
-				golog.Field("user-agent", c.Request.UserAgent()),
-			)
+			zapLogger.Warn("请求处理", fields...)
 		} else {
-			zapLogger.Info("请求处理",
-				golog.Field("traceId", traceId),
-				golog.Field("method", c.Request.Method),
-				golog.Field("path", path),
-				golog.Field("query", query),
-				golog.Field("status", statusCode),
-				golog.Field("ip", c.ClientIP()),
-				golog.Field("latency", cost),
-				golog.Field("user-agent", c.Request.UserAgent()),
-			)
+			zapLogger.Info("请求处理", fields...)
 		}
 	}
 }
