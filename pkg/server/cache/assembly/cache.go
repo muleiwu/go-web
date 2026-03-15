@@ -3,43 +3,41 @@ package assembly
 import (
 	"errors"
 	"fmt"
-	"time"
 
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-	gocache "github.com/muleiwu/go-cache"
+	"cnb.cool/mliev/open/go-web/pkg/container"
+	cacheDriver "cnb.cool/mliev/open/go-web/pkg/server/cache/driver"
 	"github.com/muleiwu/gsr"
+	"github.com/redis/go-redis/v9"
 )
 
 type Cache struct {
-	Helper interfaces.HelperInterface
 }
 
 func (receiver *Cache) Assembly() error {
+	cfg := container.MustGet[gsr.Provider]("config")
+	logger := container.MustGet[gsr.Logger]("logger")
 
-	driver := receiver.Helper.GetConfig().GetString("cache.driver", "redis")
-	receiver.Helper.GetLogger().Debug("加载缓存驱动" + driver)
+	driverName := cfg.GetString("cache.driver", "redis")
+	logger.Debug("加载缓存驱动" + driverName)
 
-	if driver == "redis" && receiver.Helper.GetRedis() == nil {
-		panic(errors.New("缓存服务驱动配置为：redis，但Redis服务不可用，拒绝启动"))
+	if driverName == "redis" {
+		if _, err := container.Get[*redis.Client]("redis"); err != nil {
+			panic(errors.New("缓存服务驱动配置为：redis，但Redis服务不可用，拒绝启动"))
+		}
 	}
 
-	cacheDriver, err := receiver.GetDriver(driver)
+	// 对于 redis 驱动，传递 redis client 作为 config
+	var config any
+	if driverName == "redis" {
+		config = container.MustGet[*redis.Client]("redis")
+	}
+
+	cacheInstance, err := cacheDriver.CacheDriverManager.Make(driverName, config)
 	if err != nil {
-		fmt.Printf("[cache] 加载缓存驱动失败: %s", err.Error())
+		fmt.Printf("[cache] 加载缓存驱动失败: %s\n", err.Error())
+		return nil
 	}
-	receiver.Helper.SetCache(cacheDriver)
 
+	container.Register(container.NewSimpleProvider("cache", cacheInstance))
 	return nil
-}
-
-func (receiver *Cache) GetDriver(driver string) (gsr.Cacher, error) {
-
-	if driver == "redis" {
-		return gocache.NewRedis(receiver.Helper.GetRedis()), nil
-	} else if driver == "memory" || driver == "local" {
-		// 设置超时时间和清理时间
-		return gocache.NewMemory(5*time.Minute, 10*time.Minute), nil
-	} else {
-		return gocache.NewNone(), nil
-	}
 }

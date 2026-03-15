@@ -1,27 +1,29 @@
 package interfaces
 
-import (
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-)
-
 // RouterContextInterface 抽象 HTTP 请求/响应上下文，隐藏底层框架细节
 type RouterContextInterface interface {
 	// 响应
 	JSON(code int, obj any)
 	String(code int, format string, values ...any)
 	// 值存取
-	Set(key any, value any)
-	GetString(key any) string
+	Set(key string, value any)
+	Get(key string) any
+	GetString(key string) string
 	// 路径参数（含正则命名捕获组）
 	Param(key string) string
+	// HTTP 头部
+	GetHeader(key string) string
+	SetHeader(key, value string)
+	// HTTP 方法
+	Method() string
 	// 流程控制
 	Next()
 	Abort()
 	AbortWithStatus(code int)
 }
 
-// HandlerFunc 是业务 handler 的统一签名，隐藏了 WrapHandler 细节
-type HandlerFunc func(RouterContextInterface, interfaces.HelperInterface)
+// HandlerFunc 是业务 handler 的统一签名
+type HandlerFunc func(RouterContextInterface)
 
 // MiddlewareFunc 是中间件的统一签名
 type MiddlewareFunc func(RouterContextInterface)

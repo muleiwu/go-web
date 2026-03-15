@@ -57,7 +57,7 @@ func (r *Router) Use(middleware ...httpInterfaces.MiddlewareFunc) {
 	handlers := make([]gin.HandlerFunc, len(middleware))
 	for i, m := range middleware {
 		fn := m
-		handlers[i] = func(c *gin.Context) { fn(c) }
+		handlers[i] = func(c *gin.Context) { fn(&routerContext{c}) }
 	}
 	r.group.Use(handlers...)
 }

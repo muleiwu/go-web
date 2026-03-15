@@ -1,26 +1,25 @@
 package assembly
 
 import (
-	"sync"
-
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
-	"cnb.cool/mliev/open/go-web/pkg/server/redis/config"
-	"cnb.cool/mliev/open/go-web/pkg/server/redis/impl"
+	"cnb.cool/mliev/open/go-web/pkg/container"
+	redisConfig "cnb.cool/mliev/open/go-web/pkg/server/redis/config"
+	redisDriver "cnb.cool/mliev/open/go-web/pkg/server/redis/driver"
+	"github.com/muleiwu/gsr"
 )
 
 type Redis struct {
-	Helper interfaces.HelperInterface
 }
 
-var (
-	redisOnce sync.Once
-)
-
 func (receiver *Redis) Assembly() error {
-	redisConfig := config.NewRedis(receiver.Helper.GetConfig())
+	cfg := container.MustGet[gsr.Provider]("config")
+	rc := redisConfig.NewRedis(cfg)
 
-	redis, err := impl.NewRedis(receiver.Helper, redisConfig.Host, redisConfig.Port, redisConfig.DB, redisConfig.Password)
-	receiver.Helper.SetRedis(redis)
+	// 使用 DriverManager 创建 Redis 连接
+	client, err := redisDriver.RedisDriverManager.Make("redis", rc)
+	if err != nil {
+		return err
+	}
 
-	return err
+	container.Register(container.NewSimpleProvider("redis", client))
+	return nil
 }

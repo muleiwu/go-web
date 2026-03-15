@@ -15,13 +15,11 @@ var templateFS embed.FS
 var staticFs embed.FS
 
 func main() {
-
-	thatFs := map[string]embed.FS{
-		"templates":  templateFS,
-		"web.static": staticFs,
-	}
-
 	gomander.Run(func() {
-		cmd.Start(thatFs, config.App{})
+		cmd.Start(
+			cmd.WithTemplateFs(templateFS),
+			cmd.WithWebStaticFs(staticFs),
+			cmd.WithApp(config.App{}),
+		)
 	})
 }

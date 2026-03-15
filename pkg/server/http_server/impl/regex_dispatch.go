@@ -65,9 +65,9 @@ func (rr *RegexRouter) mount() {
 					Value: matches[i],
 				})
 			}
-			// 依次执行 handler 链
+			// 依次执行 handler 链（通过 WrapHandler 注入请求级 logger）
 			for _, h := range m.handlers {
-				h(c, deps.getHttpDeps(deps.getTraceId(c)))
+				deps.WrapHandler(h)(c)
 			}
 			return
 		}

@@ -6,61 +6,70 @@ import (
 	"net/http"
 	"strings"
 
-	"cnb.cool/mliev/open/go-web/pkg/interfaces"
+	"cnb.cool/mliev/open/go-web/pkg/container"
 	"cnb.cool/mliev/open/go-web/pkg/server/http_server/impl/static_handler"
 	"github.com/gin-gonic/gin"
+	"github.com/muleiwu/gsr"
 )
 
 type StaticHandler struct {
-	helper interfaces.HelperInterface
 	engine *gin.Engine
 	driver static_handler.StaticFileDriver
 }
 
-func NewStaticHandler(helper interfaces.HelperInterface, engine *gin.Engine) *StaticHandler {
+func NewStaticHandler(engine *gin.Engine) *StaticHandler {
 	return &StaticHandler{
-		helper: helper,
 		engine: engine,
 	}
 }
 
+func (receiver *StaticHandler) getConfig() gsr.Provider {
+	return container.MustGet[gsr.Provider]("config")
+}
+
+func (receiver *StaticHandler) getLogger() gsr.Logger {
+	return container.MustGet[gsr.Logger]("logger")
+}
+
 // setupStaticFileServers 为嵌入的静态文件设置HTTP服务
 func (receiver *StaticHandler) setupStaticFileServers() {
+	config := receiver.getConfig()
+	logger := receiver.getLogger()
 
-	if !receiver.helper.GetConfig().GetBool("http.load_static", false) {
+	if !config.GetBool("http.load_static", false) {
 		return
 	}
 
-	staticDirSlice := receiver.helper.GetConfig().GetStringSlice("http.static_dir", []string{})
+	staticDirSlice := config.GetStringSlice("http.static_dir", []string{})
 
 	if len(staticDirSlice) == 0 {
-		receiver.helper.GetLogger().Warn("没有配置需要加载的目录")
+		logger.Warn("没有配置需要加载的目录")
 		return
 	}
 
 	// 初始化驱动（只判断一次）
-	staticMode := receiver.helper.GetConfig().GetString("http.static_mode", "embed")
-	receiver.helper.GetLogger().Debug(fmt.Sprintf("当前静态文件模式：%s", staticMode))
+	staticMode := config.GetString("http.static_mode", "embed")
+	logger.Debug(fmt.Sprintf("当前静态文件模式：%s", staticMode))
 
 	if staticMode == "disk" {
 		// disk 模式下使用磁盘驱动，支持热更新
 		receiver.driver = static_handler.NewDiskStaticDriver("./static")
-		receiver.helper.GetLogger().Info("Disk 模式：使用磁盘驱动加载静态文件，支持热更新")
+		logger.Info("Disk 模式：使用磁盘驱动加载静态文件，支持热更新")
 	} else {
 		// embed 模式下使用 embed 驱动
-		staticFs := receiver.helper.GetConfig().Get("static.fs", map[string]embed.FS{}).(map[string]embed.FS)
+		staticFs := config.Get("static.fs", map[string]embed.FS{}).(map[string]embed.FS)
 		embeddedFs, ok := staticFs["web.static"]
 		if !ok {
-			receiver.helper.GetLogger().Debug("不存在需要对Web暴露的静态资源")
+			logger.Debug("不存在需要对Web暴露的静态资源")
 			return
 		}
 		receiver.driver = static_handler.NewEmbedStaticDriver(embeddedFs)
-		receiver.helper.GetLogger().Info("Embed 模式：使用 embed 驱动加载静态文件")
+		logger.Info("Embed 模式：使用 embed 驱动加载静态文件")
 	}
 
 	for i, dir := range staticDirSlice {
 		receiver.loadStatic(dir)
-		receiver.helper.GetLogger().Debug(fmt.Sprintf("序号：%d 加载文件夹：%s", i, dir))
+		logger.Debug(fmt.Sprintf("序号：%d 加载文件夹：%s", i, dir))
 	}
 
 	// 统一处理未匹配的路由
@@ -108,15 +117,16 @@ func (receiver *StaticHandler) setupStaticFileServers() {
 }
 
 func (receiver *StaticHandler) loadStatic(dir string) {
+	logger := receiver.getLogger()
 	relativePath := fmt.Sprintf("/%s", dir)
 
 	// 使用驱动获取文件系统
 	fileSystem, err := receiver.driver.GetFS(dir)
 	if err == nil {
 		receiver.engine.StaticFS(relativePath, fileSystem)
-		receiver.helper.GetLogger().Info(fmt.Sprintf("已启用 %s 静态文件服务 (%s驱动)", relativePath, receiver.driver.GetDriverName()))
+		logger.Info(fmt.Sprintf("已启用 %s 静态文件服务 (%s驱动)", relativePath, receiver.driver.GetDriverName()))
 	} else {
-		receiver.helper.GetLogger().Error(fmt.Sprintf("设置%s静态文件失败: %v", relativePath, err))
+		logger.Error(fmt.Sprintf("设置%s静态文件失败: %v", relativePath, err))
 	}
 }
 
