@@ -1,7 +1,6 @@
 package config
 
 import (
-	"cnb.cool/mliev/open/go-web/config/autoload"
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	cacheAssembly "cnb.cool/mliev/open/go-web/pkg/server/cache/assembly"
 	configAssembly "cnb.cool/mliev/open/go-web/pkg/server/config/assembly"
@@ -33,9 +32,7 @@ func (a App) Assemblies() []interfaces.AssemblyInterface {
 // Servers 返回标准服务链（migration + http_server）。
 func (a App) Servers() []interfaces.ServerInterface {
 	return []interfaces.ServerInterface{
-		&migration.Migration{
-			Migration: autoload.Migration{}.Get(),
-		},
+		&migration.Migration{},
 		&service.HttpServer{},
 	}
 }
