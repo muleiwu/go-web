@@ -6,39 +6,40 @@ import (
 	"strings"
 )
 
-// getDeps 获取 provider 的依赖列表，未实现 DependencyAware 的返回 nil
-func getDeps(p Provider) []string {
-	if da, ok := p.(DependencyAware); ok {
-		return da.DependsOn()
-	}
-	return nil
+// Sortable 任何具有名称和依赖声明的类型均可参与拓扑排序。
+type Sortable interface {
+	Name() string
+	DependsOn() []string
 }
 
-// topoSort 使用 Kahn 算法对 providers 进行拓扑排序。
-// 返回按依赖顺序排列的 name 列表（被依赖者在前）。
-// 若存在循环依赖或缺失依赖，返回错误。
-func topoSort(providers map[string]*entry) ([]string, error) {
-	// 构建邻接表和入度表
-	inDegree := make(map[string]int, len(providers))
-	// graph[A] = [B, C] 表示 A 被 B、C 依赖（A 初始化后才能初始化 B、C）
-	graph := make(map[string][]string, len(providers))
+// SortByDependency 使用 Kahn 算法对实现 Sortable 接口的元素进行拓扑排序。
+// 返回按依赖顺序排列的列表（被依赖者在前）。
+// 若存在循环依赖、缺失依赖或重复名称，返回错误。
+func SortByDependency[T Sortable](items []T) ([]T, error) {
+	byName := make(map[string]T, len(items))
+	inDegree := make(map[string]int, len(items))
+	graph := make(map[string][]string, len(items))
 
-	for name := range providers {
+	for _, item := range items {
+		name := item.Name()
+		if _, exists := byName[name]; exists {
+			return nil, fmt.Errorf("duplicate name: %q", name)
+		}
+		byName[name] = item
 		inDegree[name] = 0
 	}
 
-	for name, e := range providers {
-		deps := getDeps(e.provider)
-		for _, dep := range deps {
-			if _, ok := providers[dep]; !ok {
-				return nil, fmt.Errorf("provider %q depends on %q, which is not registered", name, dep)
+	for _, item := range items {
+		name := item.Name()
+		for _, dep := range item.DependsOn() {
+			if _, ok := byName[dep]; !ok {
+				return nil, fmt.Errorf("%q depends on %q, which is not registered", name, dep)
 			}
 			graph[dep] = append(graph[dep], name)
 			inDegree[name]++
 		}
 	}
 
-	// 入度为 0 的节点入队（排序保证确定性）
 	var queue []string
 	for name, deg := range inDegree {
 		if deg == 0 {
@@ -53,7 +54,6 @@ func topoSort(providers map[string]*entry) ([]string, error) {
 		queue = queue[1:]
 		order = append(order, name)
 
-		// 对邻居排序保证确定性
 		neighbors := graph[name]
 		sort.Strings(neighbors)
 		for _, next := range neighbors {
@@ -62,21 +62,23 @@ func topoSort(providers map[string]*entry) ([]string, error) {
 				queue = append(queue, next)
 			}
 		}
-		// 重新排序队列保证确定性
 		sort.Strings(queue)
 	}
 
-	if len(order) != len(providers) {
-		cycle := extractCycle(providers, inDegree)
+	if len(order) != len(items) {
+		cycle := extractSortableCycle(byName, inDegree)
 		return nil, fmt.Errorf("circular dependency detected: %s", cycle)
 	}
 
-	return order, nil
+	result := make([]T, len(order))
+	for i, name := range order {
+		result[i] = byName[name]
+	}
+	return result, nil
 }
 
-// extractCycle 从剩余未排序的节点中提取一个循环路径，返回可读字符串
-func extractCycle(providers map[string]*entry, inDegree map[string]int) string {
-	// 找到一个入度不为 0 的节点开始
+// extractSortableCycle 从剩余未排序的节点中提取一个循环路径，返回可读字符串
+func extractSortableCycle[T Sortable](byName map[string]T, inDegree map[string]int) string {
 	remaining := make(map[string]bool)
 	for name, deg := range inDegree {
 		if deg > 0 {
@@ -84,21 +86,18 @@ func extractCycle(providers map[string]*entry, inDegree map[string]int) string {
 		}
 	}
 
-	// 从任意剩余节点开始 DFS 找循环
 	var start string
 	for name := range remaining {
 		start = name
 		break
 	}
 
-	// 沿依赖链走，直到找到重复节点
 	visited := make(map[string]bool)
 	var path []string
 	current := start
 
 	for {
 		if visited[current] {
-			// 从 current 开始截取循环部分
 			cycleStart := -1
 			for i, name := range path {
 				if name == current {
@@ -115,10 +114,10 @@ func extractCycle(providers map[string]*entry, inDegree map[string]int) string {
 		visited[current] = true
 		path = append(path, current)
 
-		// 找 current 的一个依赖（也在 remaining 中）
-		deps := getDeps(providers[current].provider)
-		found := false
+		item := byName[current]
+		deps := item.DependsOn()
 		sort.Strings(deps)
+		found := false
 		for _, dep := range deps {
 			if remaining[dep] {
 				current = dep
@@ -131,11 +130,47 @@ func extractCycle(providers map[string]*entry, inDegree map[string]int) string {
 		}
 	}
 
-	// fallback：列出所有剩余节点
 	var names []string
 	for name := range remaining {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	return strings.Join(names, ", ")
+}
+
+// getDeps 获取 provider 的依赖列表，未实现 DependencyAware 的返回 nil
+func getDeps(p Provider) []string {
+	if da, ok := p.(DependencyAware); ok {
+		return da.DependsOn()
+	}
+	return nil
+}
+
+// providerSortable 将 entry 包装为 Sortable，用于 topoSort 内部复用泛型排序
+type providerSortable struct {
+	name     string
+	provider Provider
+}
+
+func (p *providerSortable) Name() string        { return p.name }
+func (p *providerSortable) DependsOn() []string { return getDeps(p.provider) }
+
+// topoSort 使用 Kahn 算法对 providers 进行拓扑排序。
+// 返回按依赖顺序排列的 name 列表（被依赖者在前）。
+func topoSort(providers map[string]*entry) ([]string, error) {
+	items := make([]*providerSortable, 0, len(providers))
+	for name, e := range providers {
+		items = append(items, &providerSortable{name: name, provider: e.provider})
+	}
+
+	sorted, err := SortByDependency(items)
+	if err != nil {
+		return nil, err
+	}
+
+	order := make([]string, len(sorted))
+	for i, item := range sorted {
+		order[i] = item.name
+	}
+	return order, nil
 }

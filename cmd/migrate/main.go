@@ -131,16 +131,8 @@ func bootstrap() (*sql.DB, string, string, error) {
 		&databaseAssembly.Database{},
 	}
 
-	sorted, err := interfaces.SortAssemblies(assemblies)
-	if err != nil {
-		return nil, "", "", fmt.Errorf("Assembly dependency error: %w", err)
-	}
-	for _, a := range sorted {
-		instance, err := a.Assembly()
-		if err != nil {
-			return nil, "", "", fmt.Errorf("装配 %s 失败: %w", a.Name(), err)
-		}
-		container.Register(container.NewSimpleProvider(a.Name(), instance))
+	if err := container.RegisterAssemblies(assemblies); err != nil {
+		return nil, "", "", err
 	}
 
 	cfg := container.MustGet[configInterface.ConfigInterface]("config")

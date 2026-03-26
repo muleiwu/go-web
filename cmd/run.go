@@ -62,17 +62,8 @@ func Start(opts ...Option) {
 }
 
 func initializeServices(o *Options) []interfaces.ServerInterface {
-	sorted, err := interfaces.SortAssemblies(o.App.Assemblies())
-	if err != nil {
+	if err := container.RegisterAssemblies(o.App.Assemblies()); err != nil {
 		panic(fmt.Sprintf("Assembly dependency error: %v", err))
-	}
-	for _, a := range sorted {
-		instance, err := a.Assembly()
-		if err != nil {
-			fmt.Printf("Error assembling %s: %v\n", a.Name(), err)
-			continue
-		}
-		container.Register(container.NewSimpleProvider(a.Name(), instance))
 	}
 
 	// 将静态资源 FS 注入到 config 中
@@ -104,21 +95,8 @@ func stopServices(servers []interfaces.ServerInterface) {
 func reloadConfiguration(o *Options) {
 	getLogger().Info("正在重新加载配置...")
 
-	// 重置 container 中的服务，使其重新创建
-	container.ResetAll()
-
-	sorted, err := interfaces.SortAssemblies(o.App.Assemblies())
-	if err != nil {
+	if err := container.ReloadAssemblies(o.App.Assemblies()); err != nil {
 		getLogger().Error(fmt.Sprintf("Assembly dependency error: %v", err))
-		return
-	}
-	for _, a := range sorted {
-		instance, err := a.Assembly()
-		if err != nil {
-			getLogger().Error(fmt.Sprintf("重新装配服务 %s 失败: %v", a.Name(), err))
-			continue
-		}
-		container.Register(container.NewSimpleProvider(a.Name(), instance))
 	}
 }
 
