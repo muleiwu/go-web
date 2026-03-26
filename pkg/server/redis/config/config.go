@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	configInterface "cnb.cool/mliev/open/go-web/pkg/server/config/interfaces"
+	"github.com/muleiwu/gsr"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -14,7 +14,7 @@ type RedisConfig struct {
 	DB       int    `json:"db"`
 }
 
-func NewRedis(config configInterface.ConfigInterface) *RedisConfig {
+func NewRedis(config gsr.Provider) *RedisConfig {
 	return &RedisConfig{
 		Host:     config.GetString("redis.host", "localhost"),
 		Port:     config.GetInt("redis.port", 6379),

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"cnb.cool/mliev/open/go-web/pkg/container"
-	configInterface "cnb.cool/mliev/open/go-web/pkg/server/config/interfaces"
 	"github.com/muleiwu/gsr"
 	"github.com/pressly/goose/v3"
 	"gorm.io/gorm"
@@ -24,18 +23,18 @@ type Migration struct {
 func (m *Migration) Run() error {
 	dir := m.getDir()
 
-	db := container.MustGet[*gorm.DB]("database")
+	db := container.MustGet[*gorm.DB]()
 	sqlDB, err := db.DB()
 	if err != nil {
 		return fmt.Errorf("[migration] 获取 sql.DB 失败: %w", err)
 	}
 
-	config := container.MustGet[configInterface.ConfigInterface]("config")
+	config := container.MustGet[gsr.Provider]()
 	driver := config.GetString("database.driver", "mysql")
 
 	// memory 驱动不支持 goose（内存数据库无法持久化迁移记录）
 	if driver == "memory" {
-		logger := container.MustGet[gsr.Logger]("logger")
+		logger := container.MustGet[gsr.Logger]()
 		logger.Warn("[migration] memory 驱动不支持版本化迁移，已跳过")
 		return nil
 	}
@@ -53,7 +52,7 @@ func (m *Migration) Run() error {
 		return fmt.Errorf("[migration] 执行迁移失败: %w", err)
 	}
 
-	logger := container.MustGet[gsr.Logger]("logger")
+	logger := container.MustGet[gsr.Logger]()
 	logger.Info(fmt.Sprintf("[migration] 迁移完成 (dir=%s, dialect=%s)", dir, dialect))
 	return nil
 }
@@ -67,7 +66,7 @@ func (m *Migration) getDir() string {
 		return m.Dir
 	}
 
-	config, err := container.Get[configInterface.ConfigInterface]("config")
+	config, err := container.Get[gsr.Provider]()
 	if err == nil {
 		if dir := config.GetString("database.migration.dir", ""); dir != "" {
 			return dir

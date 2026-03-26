@@ -1,8 +1,7 @@
 package autoload
 
 import (
-	"cnb.cool/mliev/open/go-web/pkg/container"
-	"github.com/muleiwu/gsr"
+	"cnb.cool/mliev/open/go-web/pkg/helper"
 )
 
 type Migration struct {
@@ -13,8 +12,7 @@ func (receiver Migration) Get() []any {
 }
 
 func (receiver Migration) InitConfig() map[string]any {
-	env := container.MustGet[gsr.Enver]("env")
 	return map[string]any{
-		"database.migration.dir": env.GetString("database.migration.dir", "migrations"),
+		"database.migration.dir": helper.GetEnv().GetString("database.migration.dir", "migrations"),
 	}
 }

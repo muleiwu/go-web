@@ -62,14 +62,12 @@ func Start(opts ...Option) {
 }
 
 func initializeServices(o *Options) []interfaces.ServerInterface {
-	for _, a := range o.App.Assemblies() {
-		if err := a.Assembly(); err != nil {
-			fmt.Printf("Error assembling: %v\n", err)
-		}
+	if err := container.RegisterAssemblies(o.App.Assemblies()); err != nil {
+		panic(fmt.Sprintf("Assembly dependency error: %v", err))
 	}
 
 	// 将静态资源 FS 注入到 config 中
-	config, err := container.Get[gsr.Provider]("config")
+	config, err := container.Get[gsr.Provider]()
 	if err == nil {
 		config.Set("static.fs", o.StaticFs)
 	}
@@ -97,19 +95,14 @@ func stopServices(servers []interfaces.ServerInterface) {
 func reloadConfiguration(o *Options) {
 	getLogger().Info("正在重新加载配置...")
 
-	// 重置 container 中的服务，使其重新创建
-	container.ResetAll()
-
-	for _, a := range o.App.Assemblies() {
-		if err := a.Assembly(); err != nil {
-			getLogger().Error(fmt.Sprintf("重新装配服务失败: %v", err))
-		}
+	if err := container.ReloadAssemblies(o.App.Assemblies()); err != nil {
+		getLogger().Error(fmt.Sprintf("Assembly dependency error: %v", err))
 	}
 }
 
 // getLogger 从 container 获取 logger，容错处理
 func getLogger() gsr.Logger {
-	l, err := container.Get[gsr.Logger]("logger")
+	l, err := container.Get[gsr.Logger]()
 	if err != nil {
 		return nil
 	}

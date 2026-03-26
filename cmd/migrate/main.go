@@ -9,10 +9,10 @@ import (
 	"cnb.cool/mliev/open/go-web/pkg/container"
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	configAssembly "cnb.cool/mliev/open/go-web/pkg/server/config/assembly"
-	configInterface "cnb.cool/mliev/open/go-web/pkg/server/config/interfaces"
 	databaseAssembly "cnb.cool/mliev/open/go-web/pkg/server/database/assembly"
 	envAssembly "cnb.cool/mliev/open/go-web/pkg/server/env/assembly"
 	loggerAssembly "cnb.cool/mliev/open/go-web/pkg/server/logger/assembly"
+	"github.com/muleiwu/gsr"
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
@@ -131,13 +131,11 @@ func bootstrap() (*sql.DB, string, string, error) {
 		&databaseAssembly.Database{},
 	}
 
-	for _, a := range assemblies {
-		if err := a.Assembly(); err != nil {
-			return nil, "", "", fmt.Errorf("装配失败: %w", err)
-		}
+	if err := container.RegisterAssemblies(assemblies); err != nil {
+		return nil, "", "", err
 	}
 
-	cfg := container.MustGet[configInterface.ConfigInterface]("config")
+	cfg := container.MustGet[gsr.Provider]()
 	driver := cfg.GetString("database.driver", "mysql")
 	dir := cfg.GetString("database.migration.dir", "migrations")
 
@@ -150,7 +148,7 @@ func bootstrap() (*sql.DB, string, string, error) {
 		return nil, "", "", fmt.Errorf("不支持的数据库驱动: %s", driver)
 	}
 
-	gormDB := container.MustGet[*gorm.DB]("database")
+	gormDB := container.MustGet[*gorm.DB]()
 	sqlDB, err := gormDB.DB()
 	if err != nil {
 		return nil, "", "", fmt.Errorf("获取 sql.DB 失败: %w", err)

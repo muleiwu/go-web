@@ -1,17 +1,15 @@
 package autoload
 
 import (
-	"cnb.cool/mliev/open/go-web/pkg/container"
-	"github.com/muleiwu/gsr"
+	"cnb.cool/mliev/open/go-web/pkg/helper"
 )
 
 type App struct {
 }
 
 func (receiver App) InitConfig() map[string]any {
-	env := container.MustGet[gsr.Enver]("env")
 	return map[string]any{
-		"app.app_name": env.GetString("app.app_name", "go-web-app"),
-		"app.mode":     env.GetString("app.mode", "debug"),
+		"app.app_name": helper.GetEnv().GetString("app.app_name", "go-web-app"),
+		"app.mode":     helper.GetEnv().GetString("app.mode", "debug"),
 	}
 }

@@ -1,16 +1,23 @@
 package assembly
 
 import (
-	"cnb.cool/mliev/open/go-web/pkg/container"
+	"reflect"
+
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	configImpl "cnb.cool/mliev/open/go-web/pkg/server/config/impl"
+	"github.com/muleiwu/gsr"
 )
 
 type Config struct {
 	DefaultConfigs []interfaces.InitConfig
 }
 
-func (receiver *Config) Assembly() error {
+func (receiver *Config) Type() reflect.Type { return reflect.TypeFor[gsr.Provider]() }
+func (receiver *Config) DependsOn() []reflect.Type {
+	return []reflect.Type{reflect.TypeFor[gsr.Enver]()}
+}
+
+func (receiver *Config) Assembly() (any, error) {
 	configHelper := configImpl.NewConfig()
 	for _, defaultConfig := range receiver.DefaultConfigs {
 		initConfigs := defaultConfig.InitConfig()
@@ -19,6 +26,5 @@ func (receiver *Config) Assembly() error {
 		}
 	}
 
-	container.Register(container.NewSimpleProvider("config", configHelper))
-	return nil
+	return configHelper, nil
 }
