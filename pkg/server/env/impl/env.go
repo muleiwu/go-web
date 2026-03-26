@@ -22,7 +22,7 @@ func NewEnv() *Env {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("警告: 配置文件未找到，将使用默认配置和环境变量: %v\n", err)
+		fmt.Printf("%v\n", err)
 	}
 
 	return &Env{}
