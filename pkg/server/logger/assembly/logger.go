@@ -12,16 +12,17 @@ import (
 type Logger struct {
 }
 
-func (receiver *Logger) Assembly() error {
+func (receiver *Logger) Name() string        { return "logger" }
+func (receiver *Logger) DependsOn() []string { return []string{"config"} }
+
+func (receiver *Logger) Assembly() (any, error) {
 	config := container.MustGet[gsr.Provider]("config")
 	mode := config.GetString("app.mode", "debug")
 
-	// 使用 DriverManager 创建日志驱动
 	logger, err := loggerDriver.LoggerDriverManager.Make(mode, nil)
 	if err != nil {
-		return fmt.Errorf("failed to initialize logger: %w", err)
+		return nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	container.Register(container.NewSimpleProvider("logger", logger))
-	return nil
+	return logger, nil
 }

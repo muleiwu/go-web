@@ -1,9 +1,12 @@
 package container
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
+	"runtime"
 	"sort"
+	"strconv"
 	"sync"
 )
 
@@ -42,6 +45,7 @@ type Container struct {
 	mu        sync.RWMutex
 	providers map[string]*entry       // name -> entry
 	aliases   map[reflect.Type]string // 接口类型 -> name
+	resolving sync.Map                // goroutine ID -> map[string]bool，运行时循环检测
 }
 
 func NewContainer() *Container {
@@ -102,17 +106,32 @@ func getFromContainer[T any](c *Container, name string) (T, error) {
 		return zero, fmt.Errorf("provider %q not found", name)
 	}
 
+	// 运行时循环依赖检测
+	gid := goroutineID()
+	val, _ := c.resolving.LoadOrStore(gid, make(map[string]bool))
+	resolvingSet := val.(map[string]bool)
+	if resolvingSet[name] {
+		return zero, fmt.Errorf("circular dependency detected at runtime: %q is already being resolved in this call chain", name)
+	}
+	resolvingSet[name] = true
+	defer func() {
+		delete(resolvingSet, name)
+		if len(resolvingSet) == 0 {
+			c.resolving.Delete(gid)
+		}
+	}()
+
 	// 懒加载，失败可重试
 	inst, err := e.resolve(name)
 	if err != nil {
 		return zero, err
 	}
 
-	val, ok := inst.(T)
+	result, ok := inst.(T)
 	if !ok {
 		return zero, fmt.Errorf("provider %q type mismatch", name)
 	}
-	return val, nil
+	return result, nil
 }
 
 // MustGet 获取服务，失败则panic（适合确定存在的场景）
@@ -222,4 +241,61 @@ func ListProviders() []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+// InitAll 按拓扑序初始化所有已注册的 Provider。
+// 在所有 Provider 注册完成后调用，可检测循环依赖并按正确顺序初始化。
+func InitAll() error {
+	return global.InitAll()
+}
+
+func (c *Container) InitAll() error {
+	c.mu.RLock()
+	sorted, err := topoSort(c.providers)
+	c.mu.RUnlock()
+	if err != nil {
+		return err
+	}
+
+	for _, name := range sorted {
+		c.mu.RLock()
+		e := c.providers[name]
+		c.mu.RUnlock()
+		if _, err := e.resolve(name); err != nil {
+			return fmt.Errorf("InitAll: failed to resolve %q: %w", name, err)
+		}
+	}
+	return nil
+}
+
+// DestroyAll 按反向拓扑序销毁所有已解析的实例（先销毁依赖者，再销毁被依赖者）。
+func DestroyAll() error {
+	return global.DestroyAll()
+}
+
+func (c *Container) DestroyAll() error {
+	c.mu.RLock()
+	sorted, err := topoSort(c.providers)
+	c.mu.RUnlock()
+	if err != nil {
+		// 拓扑排序失败时回退到无序销毁
+		c.ResetAll()
+		return err
+	}
+
+	// 反向销毁：先销毁依赖者，再销毁被依赖者
+	for i := len(sorted) - 1; i >= 0; i-- {
+		c.Reset(sorted[i])
+	}
+	return nil
+}
+
+// goroutineID 获取当前 goroutine 的 ID，用于运行时循环检测
+func goroutineID() int64 {
+	var buf [64]byte
+	n := runtime.Stack(buf[:], false)
+	// "goroutine 123 [..."
+	field := bytes.Fields(buf[:n])[1]
+	id, _ := strconv.ParseInt(string(field), 10, 64)
+	return id
 }

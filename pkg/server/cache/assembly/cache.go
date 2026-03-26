@@ -13,7 +13,10 @@ import (
 type Cache struct {
 }
 
-func (receiver *Cache) Assembly() error {
+func (receiver *Cache) Name() string        { return "cache" }
+func (receiver *Cache) DependsOn() []string { return []string{"config", "logger", "redis"} }
+
+func (receiver *Cache) Assembly() (any, error) {
 	cfg := container.MustGet[gsr.Provider]("config")
 	logger := container.MustGet[gsr.Logger]("logger")
 
@@ -22,7 +25,7 @@ func (receiver *Cache) Assembly() error {
 
 	if driverName == "redis" {
 		if _, err := container.Get[*redis.Client]("redis"); err != nil {
-			panic(errors.New("缓存服务驱动配置为：redis，但Redis服务不可用，拒绝启动"))
+			return nil, errors.New("缓存服务驱动配置为：redis，但Redis服务不可用，拒绝启动")
 		}
 	}
 
@@ -34,10 +37,8 @@ func (receiver *Cache) Assembly() error {
 
 	cacheInstance, err := cacheDriver.CacheDriverManager.Make(driverName, config)
 	if err != nil {
-		fmt.Printf("[cache] 加载缓存驱动失败: %s\n", err.Error())
-		return nil
+		return nil, fmt.Errorf("加载缓存驱动失败: %w", err)
 	}
 
-	container.Register(container.NewSimpleProvider("cache", cacheInstance))
-	return nil
+	return cacheInstance, nil
 }

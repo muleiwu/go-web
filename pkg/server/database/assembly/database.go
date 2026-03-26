@@ -10,16 +10,17 @@ import (
 type Database struct {
 }
 
-func (receiver *Database) Assembly() error {
+func (receiver *Database) Name() string        { return "database" }
+func (receiver *Database) DependsOn() []string { return []string{"config"} }
+
+func (receiver *Database) Assembly() (any, error) {
 	cfg := container.MustGet[gsr.Provider]("config")
 	databaseConfig := config.NewConfig(cfg)
 
-	// 使用 DriverManager 创建数据库连接
 	database, err := dbDriver.DatabaseDriverManager.Make(databaseConfig.Driver, databaseConfig)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	container.Register(container.NewSimpleProvider("database", database))
-	return nil
+	return database, nil
 }

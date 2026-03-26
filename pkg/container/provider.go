@@ -16,3 +16,9 @@ type Initializable interface {
 type Destroyable interface {
 	Destroy() error
 }
+
+// DependencyAware 可选接口，Provider 实现后可声明依赖。
+// 未实现此接口的 Provider 视为无依赖。
+type DependencyAware interface {
+	DependsOn() []string
+}
