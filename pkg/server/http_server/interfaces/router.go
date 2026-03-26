@@ -4,18 +4,32 @@ package interfaces
 type RouterContextInterface interface {
 	// 响应
 	JSON(code int, obj any)
+	HTML(code int, name string, obj any)
 	String(code int, format string, values ...any)
+	Data(code int, contentType string, data []byte)
+	Redirect(code int, location string)
+	// 请求参数
+	Query(key string) string
+	DefaultQuery(key, defaultValue string) string
+	PostForm(key string) string
+	ShouldBindJSON(obj any) error
 	// 值存取
 	Set(key string, value any)
 	Get(key string) any
 	GetString(key string) string
 	// 路径参数（含正则命名捕获组）
 	Param(key string) string
+	// 请求信息
+	Path() string
+	FullPath() string
+	Method() string
+	ClientIP() string
 	// HTTP 头部
 	GetHeader(key string) string
 	SetHeader(key, value string)
-	// HTTP 方法
-	Method() string
+	// Cookie
+	Cookie(name string) (string, error)
+	SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
 	// 流程控制
 	Next()
 	Abort()
