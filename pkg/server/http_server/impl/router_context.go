@@ -32,3 +32,7 @@ func (rc *routerContext) SetHeader(key, value string) {
 func (rc *routerContext) Method() string {
 	return rc.Context.Request.Method
 }
+
+func (rc *routerContext) Path() string {
+	return rc.Context.Request.URL.Path
+}
