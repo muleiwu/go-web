@@ -2,11 +2,16 @@ package impl
 
 import (
 	"net/http"
+	"reflect"
 	"regexp"
+	"runtime"
 	"strings"
 
+	"cnb.cool/mliev/open/go-web/pkg/container"
 	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 	"github.com/gin-gonic/gin"
+	"github.com/muleiwu/golog"
+	"github.com/muleiwu/gsr"
 )
 
 // regexMatcher 存储一条编译后的正则路由规则
@@ -31,10 +36,32 @@ func (rr *RegexRouter) add(method, pattern string, handlers []httpInterfaces.Han
 		re:       re,
 		handlers: handlers,
 	})
+
+	// 打印正则路由注册日志，与 Gin 标准路由日志风格一致
+	rr.logRouteRegistration(method, pattern, handlers)
+
 	if !rr.mounted {
 		rr.mount()
 		rr.mounted = true
 	}
+}
+
+func (rr *RegexRouter) logRouteRegistration(method, pattern string, handlers []httpInterfaces.HandlerFunc) {
+	logger := container.MustGet[gsr.Logger]()
+	displayMethod := method
+	if displayMethod == "" {
+		displayMethod = "ANY"
+	}
+	handlerName := ""
+	if len(handlers) > 0 {
+		handlerName = runtime.FuncForPC(reflect.ValueOf(handlers[len(handlers)-1]).Pointer()).Name()
+	}
+	logger.Info("路由注册",
+		golog.Field("method", displayMethod),
+		golog.Field("path", pattern),
+		golog.Field("handler", handlerName),
+		golog.Field("handlers", len(handlers)),
+	)
 }
 
 // mount 注册 Gin 通配路由，将请求分发到匹配的正则 handler
