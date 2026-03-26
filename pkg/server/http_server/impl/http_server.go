@@ -109,7 +109,9 @@ func (receiver *HttpServer) RunHttp() {
 	go func() {
 		logger.Info(fmt.Sprintf("服务器启动于 %s", addr))
 		if err := receiver.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error(fmt.Sprintf("启动服务器失败: %v", err))
+			logger.Error("启动服务器失败")
+			logger.Error(err.Error())
+			panic(err)
 		}
 	}()
 }
