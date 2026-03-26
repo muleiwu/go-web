@@ -1,16 +1,21 @@
 package assembly
 
 import (
+	"reflect"
+
 	"cnb.cool/mliev/open/go-web/pkg/interfaces"
 	configImpl "cnb.cool/mliev/open/go-web/pkg/server/config/impl"
+	"github.com/muleiwu/gsr"
 )
 
 type Config struct {
 	DefaultConfigs []interfaces.InitConfig
 }
 
-func (receiver *Config) Name() string        { return "config" }
-func (receiver *Config) DependsOn() []string { return []string{"env"} }
+func (receiver *Config) Type() reflect.Type { return reflect.TypeFor[gsr.Provider]() }
+func (receiver *Config) DependsOn() []reflect.Type {
+	return []reflect.Type{reflect.TypeFor[gsr.Enver]()}
+}
 
 func (receiver *Config) Assembly() (any, error) {
 	configHelper := configImpl.NewConfig()

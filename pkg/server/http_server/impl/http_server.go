@@ -30,11 +30,11 @@ func NewHttpServer() *HttpServer {
 }
 
 func (receiver *HttpServer) getConfig() gsr.Provider {
-	return container.MustGet[gsr.Provider]("config")
+	return container.MustGet[gsr.Provider]()
 }
 
 func (receiver *HttpServer) getLogger() gsr.Logger {
-	return container.MustGet[gsr.Logger]("logger")
+	return container.MustGet[gsr.Logger]()
 }
 
 // RunHttp 启动HTTP服务器并注册路由和中间件
@@ -179,7 +179,7 @@ func (receiver *HttpServer) loadTemplates(engine *gin.Engine) error {
 	}
 
 	if len(templateFiles) == 0 {
-		logger.Warn("没有找到任何模板文件")
+		logger.Notice("没有找到任何模板文件")
 		return nil
 	}
 

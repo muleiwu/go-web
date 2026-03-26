@@ -1,33 +1,51 @@
 package container
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
 
+// 测试用哨兵类型
+type typeA struct{}
+type typeB struct{}
+type typeC struct{}
+type typeD struct{}
+type typeX struct{}
+type typeY struct{}
+type typeZ struct{}
+
+// 模拟框架实际的服务类型
+type typeEnv struct{}
+type typeConfig struct{}
+type typeLogger struct{}
+type typeDatabase struct{}
+type typeRedis struct{}
+type typeCache struct{}
+
 // testProvider 用于测试的 Provider 实现
 type testProvider struct {
-	name string
-	deps []string
+	typ  reflect.Type
+	deps []reflect.Type
 }
 
-func (p *testProvider) Name() string        { return p.name }
-func (p *testProvider) Build() any          { return p.name }
-func (p *testProvider) Priority() int       { return 0 }
-func (p *testProvider) DependsOn() []string { return p.deps }
+func (p *testProvider) Type() reflect.Type        { return p.typ }
+func (p *testProvider) Build() any                { return nil }
+func (p *testProvider) Priority() int             { return 0 }
+func (p *testProvider) DependsOn() []reflect.Type { return p.deps }
 
-func makeEntries(providers ...*testProvider) map[string]*entry {
-	m := make(map[string]*entry)
+func makeEntries(providers ...*testProvider) map[reflect.Type]*entry {
+	m := make(map[reflect.Type]*entry)
 	for _, p := range providers {
-		m[p.name] = &entry{provider: p}
+		m[p.typ] = &entry{provider: p}
 	}
 	return m
 }
 
-// indexOf 返回 name 在 order 中的位置
-func indexOf(order []string, name string) int {
-	for i, n := range order {
-		if n == name {
+// indexOfType 返回 typ 在 order 中的位置
+func indexOfType(order []reflect.Type, typ reflect.Type) int {
+	for i, t := range order {
+		if t == typ {
 			return i
 		}
 	}
@@ -35,11 +53,15 @@ func indexOf(order []string, name string) int {
 }
 
 func TestTopoSort_LinearChain(t *testing.T) {
+	tA := reflect.TypeFor[typeA]()
+	tB := reflect.TypeFor[typeB]()
+	tC := reflect.TypeFor[typeC]()
+
 	// C -> B -> A（A 无依赖，B 依赖 A，C 依赖 B）
 	entries := makeEntries(
-		&testProvider{name: "A", deps: nil},
-		&testProvider{name: "B", deps: []string{"A"}},
-		&testProvider{name: "C", deps: []string{"B"}},
+		&testProvider{typ: tA, deps: nil},
+		&testProvider{typ: tB, deps: []reflect.Type{tA}},
+		&testProvider{typ: tC, deps: []reflect.Type{tB}},
 	)
 
 	order, err := topoSort(entries)
@@ -52,21 +74,26 @@ func TestTopoSort_LinearChain(t *testing.T) {
 	}
 
 	// A 必须在 B 前面，B 必须在 C 前面
-	if indexOf(order, "A") > indexOf(order, "B") {
+	if indexOfType(order, tA) > indexOfType(order, tB) {
 		t.Errorf("A should come before B, got %v", order)
 	}
-	if indexOf(order, "B") > indexOf(order, "C") {
+	if indexOfType(order, tB) > indexOfType(order, tC) {
 		t.Errorf("B should come before C, got %v", order)
 	}
 }
 
 func TestTopoSort_Diamond(t *testing.T) {
+	tA := reflect.TypeFor[typeA]()
+	tB := reflect.TypeFor[typeB]()
+	tC := reflect.TypeFor[typeC]()
+	tD := reflect.TypeFor[typeD]()
+
 	// D 无依赖，B 和 C 依赖 D，A 依赖 B 和 C
 	entries := makeEntries(
-		&testProvider{name: "D", deps: nil},
-		&testProvider{name: "B", deps: []string{"D"}},
-		&testProvider{name: "C", deps: []string{"D"}},
-		&testProvider{name: "A", deps: []string{"B", "C"}},
+		&testProvider{typ: tD, deps: nil},
+		&testProvider{typ: tB, deps: []reflect.Type{tD}},
+		&testProvider{typ: tC, deps: []reflect.Type{tD}},
+		&testProvider{typ: tA, deps: []reflect.Type{tB, tC}},
 	)
 
 	order, err := topoSort(entries)
@@ -79,25 +106,25 @@ func TestTopoSort_Diamond(t *testing.T) {
 	}
 
 	// D 在 B 和 C 前面，B 和 C 在 A 前面
-	if indexOf(order, "D") > indexOf(order, "B") {
+	if indexOfType(order, tD) > indexOfType(order, tB) {
 		t.Errorf("D should come before B, got %v", order)
 	}
-	if indexOf(order, "D") > indexOf(order, "C") {
+	if indexOfType(order, tD) > indexOfType(order, tC) {
 		t.Errorf("D should come before C, got %v", order)
 	}
-	if indexOf(order, "B") > indexOf(order, "A") {
+	if indexOfType(order, tB) > indexOfType(order, tA) {
 		t.Errorf("B should come before A, got %v", order)
 	}
-	if indexOf(order, "C") > indexOf(order, "A") {
+	if indexOfType(order, tC) > indexOfType(order, tA) {
 		t.Errorf("C should come before A, got %v", order)
 	}
 }
 
 func TestTopoSort_NoDependencies(t *testing.T) {
 	entries := makeEntries(
-		&testProvider{name: "X", deps: nil},
-		&testProvider{name: "Y", deps: nil},
-		&testProvider{name: "Z", deps: nil},
+		&testProvider{typ: reflect.TypeFor[typeX](), deps: nil},
+		&testProvider{typ: reflect.TypeFor[typeY](), deps: nil},
+		&testProvider{typ: reflect.TypeFor[typeZ](), deps: nil},
 	)
 
 	order, err := topoSort(entries)
@@ -111,9 +138,12 @@ func TestTopoSort_NoDependencies(t *testing.T) {
 }
 
 func TestTopoSort_SimpleCycle(t *testing.T) {
+	tA := reflect.TypeFor[typeA]()
+	tB := reflect.TypeFor[typeB]()
+
 	entries := makeEntries(
-		&testProvider{name: "A", deps: []string{"B"}},
-		&testProvider{name: "B", deps: []string{"A"}},
+		&testProvider{typ: tA, deps: []reflect.Type{tB}},
+		&testProvider{typ: tB, deps: []reflect.Type{tA}},
 	)
 
 	_, err := topoSort(entries)
@@ -127,10 +157,14 @@ func TestTopoSort_SimpleCycle(t *testing.T) {
 }
 
 func TestTopoSort_ComplexCycle(t *testing.T) {
+	tA := reflect.TypeFor[typeA]()
+	tB := reflect.TypeFor[typeB]()
+	tC := reflect.TypeFor[typeC]()
+
 	entries := makeEntries(
-		&testProvider{name: "A", deps: []string{"B"}},
-		&testProvider{name: "B", deps: []string{"C"}},
-		&testProvider{name: "C", deps: []string{"A"}},
+		&testProvider{typ: tA, deps: []reflect.Type{tB}},
+		&testProvider{typ: tB, deps: []reflect.Type{tC}},
+		&testProvider{typ: tC, deps: []reflect.Type{tA}},
 	)
 
 	_, err := topoSort(entries)
@@ -144,8 +178,11 @@ func TestTopoSort_ComplexCycle(t *testing.T) {
 }
 
 func TestTopoSort_MissingDependency(t *testing.T) {
+	tA := reflect.TypeFor[typeA]()
+	tX := reflect.TypeFor[typeX]()
+
 	entries := makeEntries(
-		&testProvider{name: "A", deps: []string{"X"}},
+		&testProvider{typ: tA, deps: []reflect.Type{tX}},
 	)
 
 	_, err := topoSort(entries)
@@ -159,17 +196,16 @@ func TestTopoSort_MissingDependency(t *testing.T) {
 }
 
 func TestTopoSort_Mixed(t *testing.T) {
-	// noDepsProvider 不实现 DependencyAware
-	type noDepsProvider struct {
-		name string
-	}
+	tA := reflect.TypeFor[typeA]()
+	tB := reflect.TypeFor[typeB]()
+	tC := reflect.TypeFor[typeC]()
 
 	entries := makeEntries(
-		&testProvider{name: "A", deps: nil},
-		&testProvider{name: "B", deps: []string{"A"}},
+		&testProvider{typ: tA, deps: nil},
+		&testProvider{typ: tB, deps: []reflect.Type{tA}},
 	)
 	// 添加一个不实现 DependencyAware 的 provider（使用 SimpleProvider，deps 为 nil）
-	entries["C"] = &entry{provider: &SimpleProvider{name: "C"}}
+	entries[tC] = &entry{provider: &SimpleProvider{typ: tC}}
 
 	order, err := topoSort(entries)
 	if err != nil {
@@ -180,20 +216,27 @@ func TestTopoSort_Mixed(t *testing.T) {
 		t.Fatalf("expected 3 entries, got %d", len(order))
 	}
 
-	if indexOf(order, "A") > indexOf(order, "B") {
+	if indexOfType(order, tA) > indexOfType(order, tB) {
 		t.Errorf("A should come before B, got %v", order)
 	}
 }
 
 func TestTopoSort_FrameworkAssemblyOrder(t *testing.T) {
+	tEnv := reflect.TypeFor[typeEnv]()
+	tConfig := reflect.TypeFor[typeConfig]()
+	tLogger := reflect.TypeFor[typeLogger]()
+	tDatabase := reflect.TypeFor[typeDatabase]()
+	tRedis := reflect.TypeFor[typeRedis]()
+	tCache := reflect.TypeFor[typeCache]()
+
 	// 模拟框架实际的依赖关系
 	entries := makeEntries(
-		&testProvider{name: "env", deps: nil},
-		&testProvider{name: "config", deps: []string{"env"}},
-		&testProvider{name: "logger", deps: []string{"config"}},
-		&testProvider{name: "database", deps: []string{"config"}},
-		&testProvider{name: "redis", deps: []string{"config"}},
-		&testProvider{name: "cache", deps: []string{"config", "logger", "redis"}},
+		&testProvider{typ: tEnv, deps: nil},
+		&testProvider{typ: tConfig, deps: []reflect.Type{tEnv}},
+		&testProvider{typ: tLogger, deps: []reflect.Type{tConfig}},
+		&testProvider{typ: tDatabase, deps: []reflect.Type{tConfig}},
+		&testProvider{typ: tRedis, deps: []reflect.Type{tConfig}},
+		&testProvider{typ: tCache, deps: []reflect.Type{tConfig, tLogger, tRedis}},
 	)
 
 	order, err := topoSort(entries)
@@ -206,17 +249,17 @@ func TestTopoSort_FrameworkAssemblyOrder(t *testing.T) {
 	}
 
 	// env 最先
-	if indexOf(order, "env") != 0 {
+	if indexOfType(order, tEnv) != 0 {
 		t.Errorf("env should be first, got %v", order)
 	}
 	// config 在 env 之后
-	if indexOf(order, "config") < indexOf(order, "env") {
+	if indexOfType(order, tConfig) < indexOfType(order, tEnv) {
 		t.Errorf("config should come after env, got %v", order)
 	}
 	// cache 在 config、logger、redis 之后
-	if indexOf(order, "cache") < indexOf(order, "config") ||
-		indexOf(order, "cache") < indexOf(order, "logger") ||
-		indexOf(order, "cache") < indexOf(order, "redis") {
+	if indexOfType(order, tCache) < indexOfType(order, tConfig) ||
+		indexOfType(order, tCache) < indexOfType(order, tLogger) ||
+		indexOfType(order, tCache) < indexOfType(order, tRedis) {
 		t.Errorf("cache should come after config, logger, and redis, got %v", order)
 	}
 }

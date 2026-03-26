@@ -6,5 +6,5 @@ import (
 )
 
 func GetCache() gsr.Cacher {
-	return container.MustGet[gsr.Cacher]("cache")
+	return container.MustGet[gsr.Cacher]()
 }

@@ -15,9 +15,9 @@ func RegisterAssemblies(assemblies []interfaces.AssemblyInterface) error {
 	for _, a := range sorted {
 		instance, err := a.Assembly()
 		if err != nil {
-			return fmt.Errorf("assembling %s failed: %w", a.Name(), err)
+			return fmt.Errorf("assembling %v failed: %w", a.Type(), err)
 		}
-		Register(NewSimpleProvider(a.Name(), instance))
+		Register(NewSimpleProvider(a.Type(), instance))
 	}
 	return nil
 }

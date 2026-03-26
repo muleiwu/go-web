@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	configInterface "cnb.cool/mliev/open/go-web/pkg/server/config/interfaces"
+	"github.com/muleiwu/gsr"
 )
 
 type DatabaseConfig struct {
@@ -15,7 +15,7 @@ type DatabaseConfig struct {
 	DBName   string `json:"dbname"`
 }
 
-func NewConfig(config configInterface.ConfigInterface) *DatabaseConfig {
+func NewConfig(config gsr.Provider) *DatabaseConfig {
 	return &DatabaseConfig{
 		Driver:   config.GetString("database.driver", "postgresql"),
 		Host:     config.GetString("database.host", "127.0.0.1"),

@@ -6,5 +6,5 @@ import (
 )
 
 func GetConfig() gsr.Provider {
-	return container.MustGet[gsr.Provider]("config")
+	return container.MustGet[gsr.Provider]()
 }

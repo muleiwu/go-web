@@ -6,5 +6,5 @@ import (
 )
 
 func GetEnv() gsr.Enver {
-	return container.MustGet[gsr.Enver]("env")
+	return container.MustGet[gsr.Enver]()
 }

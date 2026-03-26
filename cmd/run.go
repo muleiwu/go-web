@@ -67,7 +67,7 @@ func initializeServices(o *Options) []interfaces.ServerInterface {
 	}
 
 	// 将静态资源 FS 注入到 config 中
-	config, err := container.Get[gsr.Provider]("config")
+	config, err := container.Get[gsr.Provider]()
 	if err == nil {
 		config.Set("static.fs", o.StaticFs)
 	}
@@ -102,7 +102,7 @@ func reloadConfiguration(o *Options) {
 
 // getLogger 从 container 获取 logger，容错处理
 func getLogger() gsr.Logger {
-	l, err := container.Get[gsr.Logger]("logger")
+	l, err := container.Get[gsr.Logger]()
 	if err != nil {
 		return nil
 	}

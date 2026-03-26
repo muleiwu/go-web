@@ -6,5 +6,5 @@ import (
 )
 
 func GetDatabase() *gorm.DB {
-	return container.MustGet[*gorm.DB]("database")
+	return container.MustGet[*gorm.DB]()
 }

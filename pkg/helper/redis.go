@@ -6,5 +6,5 @@ import (
 )
 
 func GetRedis() *redis.Client {
-	return container.MustGet[*redis.Client]("redis")
+	return container.MustGet[*redis.Client]()
 }

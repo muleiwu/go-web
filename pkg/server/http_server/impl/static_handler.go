@@ -24,11 +24,11 @@ func NewStaticHandler(engine *gin.Engine) *StaticHandler {
 }
 
 func (receiver *StaticHandler) getConfig() gsr.Provider {
-	return container.MustGet[gsr.Provider]("config")
+	return container.MustGet[gsr.Provider]()
 }
 
 func (receiver *StaticHandler) getLogger() gsr.Logger {
-	return container.MustGet[gsr.Logger]("logger")
+	return container.MustGet[gsr.Logger]()
 }
 
 // setupStaticFileServers 为嵌入的静态文件设置HTTP服务

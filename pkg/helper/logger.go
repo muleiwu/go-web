@@ -6,5 +6,5 @@ import (
 )
 
 func GetLogger() gsr.Logger {
-	return container.MustGet[gsr.Logger]("logger")
+	return container.MustGet[gsr.Logger]()
 }

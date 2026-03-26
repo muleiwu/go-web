@@ -27,7 +27,7 @@ func (d *HttpDeps) WrapHandler(handler httpInterfaces.HandlerFunc) gin.HandlerFu
 	return func(c *gin.Context) {
 		// 将请求级 logger 存入上下文
 		traceId := c.GetString("traceId")
-		baseLogger := container.MustGet[gsr.Logger]("logger")
+		baseLogger := container.MustGet[gsr.Logger]()
 		c.Set(helper.RequestLoggerKey, NewHttpLogger(baseLogger, traceId))
 
 		handler(&routerContext{c})
