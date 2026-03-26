@@ -85,7 +85,7 @@ func (receiver *HttpServer) RunHttp() {
 	receiver.loadWebStatic(engine)
 
 	// 注册中间件
-	middlewareFuncList := config.Get("http.middleware", []httpInterfaces.MiddlewareFunc{}).([]httpInterfaces.MiddlewareFunc)
+	middlewareFuncList := config.Get("http.middleware", []httpInterfaces.HandlerFunc{}).([]httpInterfaces.HandlerFunc)
 	for _, mw := range middlewareFuncList {
 		if mw == nil {
 			continue

@@ -10,7 +10,7 @@ type Middleware struct {
 
 func (receiver Middleware) InitConfig() map[string]any {
 	return map[string]any{
-		"http.middleware": []httpInterfaces.MiddlewareFunc{
+		"http.middleware": []httpInterfaces.HandlerFunc{
 			middleware.CorsMiddleware(),
 		},
 	}

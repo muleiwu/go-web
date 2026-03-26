@@ -49,11 +49,11 @@ func (r *Router) Group(path string) httpInterfaces.RouterInterface {
 	}
 }
 
-func (r *Router) RegexGroup(prefix string) httpInterfaces.RegexRouterInterface {
-	return &RegexRouter{prefix: prefix, router: r}
+func (r *Router) RegexGroup(prefix string, middleware ...httpInterfaces.HandlerFunc) httpInterfaces.RegexRouterInterface {
+	return &RegexRouter{prefix: prefix, router: r, middleware: middleware}
 }
 
-func (r *Router) Use(middleware ...httpInterfaces.MiddlewareFunc) {
+func (r *Router) Use(middleware ...httpInterfaces.HandlerFunc) {
 	handlers := make([]gin.HandlerFunc, len(middleware))
 	for i, m := range middleware {
 		fn := m
