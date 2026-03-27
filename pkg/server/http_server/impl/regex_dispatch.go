@@ -8,11 +8,30 @@ import (
 	"strings"
 
 	"cnb.cool/mliev/open/go-web/pkg/container"
+	"cnb.cool/mliev/open/go-web/pkg/helper"
 	httpInterfaces "cnb.cool/mliev/open/go-web/pkg/server/http_server/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/muleiwu/golog"
 	"github.com/muleiwu/gsr"
 )
+
+// regexContext 包装 routerContext，覆盖 Next() 以支持正则路由的 handler 链式调用
+type regexContext struct {
+	routerContext
+	chain []httpInterfaces.HandlerFunc
+	index int
+}
+
+func (rc *regexContext) Next() {
+	rc.index++
+	for rc.index < len(rc.chain) {
+		if rc.IsAborted() {
+			return
+		}
+		rc.chain[rc.index](rc)
+		rc.index++
+	}
+}
 
 // regexMatcher 存储一条编译后的正则路由规则
 type regexMatcher struct {
@@ -23,10 +42,11 @@ type regexMatcher struct {
 
 // RegexRouter 收集正则路由并生成 Gin 通配路由的分发 handler
 type RegexRouter struct {
-	prefix   string
-	router   *Router
-	matchers []regexMatcher
-	mounted  bool
+	prefix     string
+	router     *Router
+	matchers   []regexMatcher
+	mounted    bool
+	middleware []httpInterfaces.HandlerFunc
 }
 
 func (rr *RegexRouter) add(method, pattern string, handlers []httpInterfaces.HandlerFunc) {
@@ -69,7 +89,6 @@ func (rr *RegexRouter) mount() {
 	// 确保 prefix 以 / 结尾后拼接 *any
 	wildcard := strings.TrimRight(rr.prefix, "/") + "/*any"
 
-	deps := rr.router.deps
 	rr.router.group.Any(wildcard, func(c *gin.Context) {
 		path := c.Request.URL.Path
 		method := c.Request.Method
@@ -92,10 +111,22 @@ func (rr *RegexRouter) mount() {
 					Value: matches[i],
 				})
 			}
-			// 依次执行 handler 链（通过 WrapHandler 注入请求级 logger）
-			for _, h := range m.handlers {
-				deps.WrapHandler(h)(c)
+			// 注入请求级 logger
+			traceId := c.GetString("traceId")
+			baseLogger := container.MustGet[gsr.Logger]()
+			c.Set(helper.RequestLoggerKey, NewHttpLogger(baseLogger, traceId))
+
+			// 组装 middleware + handlers 链，通过 regexContext 支持 Next() 调用
+			chain := make([]httpInterfaces.HandlerFunc, 0, len(rr.middleware)+len(m.handlers))
+			chain = append(chain, rr.middleware...)
+			chain = append(chain, m.handlers...)
+
+			ctx := &regexContext{
+				routerContext: routerContext{c},
+				chain:         chain,
+				index:         -1,
 			}
+			ctx.Next()
 			return
 		}
 		// 无匹配，返回 404

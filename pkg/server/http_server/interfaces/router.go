@@ -39,9 +39,6 @@ type RouterContextInterface interface {
 // HandlerFunc 是业务 handler 的统一签名
 type HandlerFunc func(RouterContextInterface)
 
-// MiddlewareFunc 是中间件的统一签名
-type MiddlewareFunc func(RouterContextInterface)
-
 // RegexRouterInterface 正则路由接口，支持正则表达式模式匹配
 type RegexRouterInterface interface {
 	GET(pattern string, handlers ...HandlerFunc)
@@ -64,6 +61,6 @@ type RouterInterface interface {
 	HEAD(path string, handler HandlerFunc)
 	OPTIONS(path string, handler HandlerFunc)
 	Group(path string) RouterInterface
-	Use(middleware ...MiddlewareFunc)
-	RegexGroup(prefix string) RegexRouterInterface
+	Use(middleware ...HandlerFunc)
+	RegexGroup(prefix string, middleware ...HandlerFunc) RegexRouterInterface
 }

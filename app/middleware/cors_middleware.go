@@ -31,12 +31,12 @@ func DefaultCorsConfig() CorsConfig {
 }
 
 // CorsMiddleware 使用默认配置创建CORS中间件
-func CorsMiddleware() httpInterfaces.MiddlewareFunc {
+func CorsMiddleware() httpInterfaces.HandlerFunc {
 	return CorsWithConfig(DefaultCorsConfig())
 }
 
 // CorsWithConfig 使用自定义配置创建CORS中间件
-func CorsWithConfig(config CorsConfig) httpInterfaces.MiddlewareFunc {
+func CorsWithConfig(config CorsConfig) httpInterfaces.HandlerFunc {
 	return func(c httpInterfaces.RouterContextInterface) {
 		origin := c.GetHeader("Origin")
 
