@@ -14,7 +14,7 @@ go run main.go       # Run in development
 go build -o bin/go-web main.go  # Build binary
 go fmt ./...         # Format code
 go vet ./...         # Vet
-go test ./...        # Run tests (none exist yet)
+go test ./...        # Run all tests
 go test -run TestFoo ./path/to/package  # Run a single test
 
 # Docker
@@ -39,14 +39,16 @@ main.go → gomander.Run() → cmd.Start(functional options) → Assembly chain 
 
 ### DI Container (`pkg/container/`)
 
-Global singleton container with lazy-loading. Services are registered as `Provider` implementations (with `Name()`, `Build()`, `Priority()`). Higher-priority providers override lower ones.
+Global singleton container with lazy-loading. Services are registered as `Provider` implementations (with `Type() reflect.Type`, `Build() any`, `Priority() int`). Higher-priority providers override lower ones. Keys are `reflect.Type`, not strings.
 
 - `container.Register(provider)` — register a provider (typically in assembly)
-- `container.Get[T](name)` / `container.MustGet[T](name)` — retrieve by name with type assertion
-- `container.Inject(target)` — auto-inject struct fields tagged `inject:"name"`
+- `container.Get[T]()` / `container.MustGet[T]()` — retrieve by type parameter (no name needed)
+- `container.Inject(target)` — auto-inject struct fields tagged `inject:""` (by field type, not name; `inject:"-"` to skip)
 - `SimpleProvider` — wraps an existing instance; `LazyProvider` — defers creation via factory func
 - `Initializable` / `Destroyable` interfaces for lifecycle hooks
+- `DependencyAware` interface — providers can declare `DependsOn() []reflect.Type` for topological sorting
 - `container.ResetAll()` — used during SIGHUP reload to force re-creation
+- Runtime circular dependency detection via goroutine ID tracking
 
 ### Driver Manager (`pkg/driver/`)
 
@@ -73,7 +75,7 @@ Two-layer config: **Env** (Viper, reads `config.yaml` + env vars with `.` → `_
 
 - `config/config.go` — lists all `InitConfig` implementations to load
 - `config/autoload/*.go` — each file implements `InitConfig` returning `map[string]any` of default config values read from env
-- Config keys use dot notation: `app.mode`, `db.driver`, `http.addr`, `redis.host`, etc.
+- Config keys use dot notation: `app.mode`, `database.driver`, `http.addr`, `redis.host`, etc.
 
 ### AppProvider Pattern (`config/app.go`)
 
@@ -93,7 +95,7 @@ Custom apps can provide their own `AppProvider` via `cmd.WithApp()`.
 
 ### Global Helpers (`pkg/helper/`)
 
-Convenience accessors that call `container.MustGet[T](name)`:
+Convenience accessors that call `container.MustGet[T]()`:
 - `helper.GetDatabase()` → `*gorm.DB`
 - `helper.GetLogger()` → logger
 - `helper.GetRedis()` → redis client
@@ -108,3 +110,5 @@ Convenience accessors that call `container.MustGet[T](name)`:
 - Chinese language in commit messages and user-facing strings
 - `gomander` wraps cobra for CLI; entry point is `gomander.Run(func() { cmd.Start(...) })`
 - Key third-party libs: `github.com/muleiwu/gsr` (service registry interfaces), `github.com/muleiwu/anyto` (type conversion), `github.com/muleiwu/go-cache` (caching), `github.com/muleiwu/golog` (logging)
+- Existing tests are in `pkg/container/` (container, assembly, topo sort); no application-layer tests yet
+- Health endpoints: `/health` (checks DB + Redis), `/health/simple` (just up/down)
