@@ -189,13 +189,13 @@ main.go → gomander.Run() → cmd.Start(WithTemplateFs, WithWebStaticFs, WithAp
 
 - **懒加载单例**：首次 `Get` 时创建实例
 - **优先级覆盖**：同名 Provider 高优先级覆盖低优先级
-- **反射注入**：通过 `inject:"name"` 标签自动注入
+- **反射注入**：通过 `inject:""` 标签按字段类型自动注入（`inject:"-"` 跳过）
 - **生命周期钩子**：`Initializable`（初始化）/ `Destroyable`（销毁）
 - **热重载支持**：`ResetAll()` 重置所有实例后重新装配
 
 ```go
 // 获取服务
-db := container.MustGet[*gorm.DB]("database")
+db := container.MustGet[*gorm.DB]()
 
 // 或使用 helper 快捷方式
 db := helper.GetDatabase()
