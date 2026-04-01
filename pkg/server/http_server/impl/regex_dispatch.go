@@ -91,6 +91,9 @@ func (rr *RegexRouter) mount() {
 
 	rr.router.group.Any(wildcard, func(c *gin.Context) {
 		path := c.Request.URL.Path
+		// 去掉前缀，让正则只匹配前缀之后的部分
+		prefix := strings.TrimRight(rr.prefix, "/")
+		path = strings.TrimPrefix(path, prefix)
 		method := c.Request.Method
 
 		for _, m := range rr.matchers {
