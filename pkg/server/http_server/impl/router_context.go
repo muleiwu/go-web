@@ -36,3 +36,7 @@ func (rc *routerContext) Method() string {
 func (rc *routerContext) Path() string {
 	return rc.Context.Request.URL.Path
 }
+
+func (rc *routerContext) Error(err error) {
+	_ = rc.Context.Error(err)
+}

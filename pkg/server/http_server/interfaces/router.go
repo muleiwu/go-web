@@ -30,6 +30,9 @@ type RouterContextInterface interface {
 	// Cookie
 	Cookie(name string) (string, error)
 	SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
+	// 错误处理
+	Error(err error)
+	IsAborted() bool
 	// 流程控制
 	Next()
 	Abort()

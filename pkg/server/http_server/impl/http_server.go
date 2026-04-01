@@ -73,8 +73,8 @@ func (receiver *HttpServer) RunHttp() {
 	engine.Use(receiver.traceIdMiddleware())
 	// 对路由的输入输出记录
 	engine.Use(receiver.ginLogger())
-	// 防止 panic 导致的程序崩溃
-	engine.Use(gin.Recovery())
+	// 防止 panic 导致的程序崩溃，同时将错误信息和堆栈写入 c.Errors 供 ginLogger 输出
+	engine.Use(receiver.recoveryWithErrors())
 
 	// 加载HTML模板
 	if err := receiver.loadTemplates(engine); err != nil {
@@ -257,6 +257,31 @@ func (w *gologWriter) Write(p []byte) (n int, err error) {
 		w.logger.Info(msg)
 	}
 	return len(p), nil
+}
+
+func (receiver *HttpServer) recoveryWithErrors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if r := recover(); r != nil {
+				const size = 4096
+				buf := make([]byte, size)
+				n := runtime.Stack(buf, false)
+
+				traceId := c.GetString("traceId")
+				zapLogger := receiver.getLogger()
+				zapLogger.Error(fmt.Sprintf("[Recovery] panic recovered:\n"+
+					"  TraceId: %s\n"+
+					"  Method:  %s\n"+
+					"  Path:    %s\n"+
+					"  Error:   %v\n"+
+					"  Stack:\n%s",
+					traceId, c.Request.Method, c.Request.URL.Path, r, buf[:n]))
+
+				c.AbortWithStatus(http.StatusInternalServerError)
+			}
+		}()
+		c.Next()
+	}
 }
 
 func (receiver *HttpServer) ginLogger() gin.HandlerFunc {
