@@ -1,5 +1,11 @@
 package interfaces
 
+import (
+	"io"
+	"mime/multipart"
+	"net/http"
+)
+
 // RouterContextInterface 抽象 HTTP 请求/响应上下文，隐藏底层框架细节
 type RouterContextInterface interface {
 	// 响应
@@ -8,11 +14,22 @@ type RouterContextInterface interface {
 	String(code int, format string, values ...any)
 	Data(code int, contentType string, data []byte)
 	Redirect(code int, location string)
+	File(filepath string)
+	Stream(step func(w io.Writer) bool)
+	Status(code int)
 	// 请求参数
 	Query(key string) string
 	DefaultQuery(key, defaultValue string) string
+	QueryArray(key string) []string
 	PostForm(key string) string
+	DefaultPostForm(key, defaultValue string) string
+	ShouldBind(obj any) error
 	ShouldBindJSON(obj any) error
+	ShouldBindQuery(obj any) error
+	GetRawData() ([]byte, error)
+	// 文件上传
+	FormFile(name string) (*multipart.FileHeader, error)
+	SaveUploadedFile(file *multipart.FileHeader, dst string) error
 	// 值存取
 	Set(key string, value any)
 	Get(key string) any
@@ -24,15 +41,28 @@ type RouterContextInterface interface {
 	FullPath() string
 	Method() string
 	ClientIP() string
+	RemoteAddr() string
+	Host() string
+	Hostname() string
+	Scheme() string
+	URL() string
+	ContentType() string
+	UserAgent() string
+	Referer() string
+	IsWebsocket() bool
 	// HTTP 头部
 	GetHeader(key string) string
 	SetHeader(key, value string)
 	// Cookie
 	Cookie(name string) (string, error)
 	SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
+	SetSameSite(mode http.SameSite)
 	// 错误处理
 	Error(err error)
 	IsAborted() bool
+	// 响应状态
+	Written() bool
+	GetStatus() int
 	// 流程控制
 	Next()
 	Abort()
