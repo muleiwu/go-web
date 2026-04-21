@@ -163,3 +163,19 @@ func (rc *routerContext) Written() bool {
 func (rc *routerContext) GetStatus() int {
 	return rc.Context.Writer.Status()
 }
+
+// ── 流程控制扩展 ──
+
+func (rc *routerContext) AbortWithStatusJSON(code int, obj any) {
+	rc.Context.AbortWithStatusJSON(code, obj)
+}
+
+// ── 底层原语 ──
+
+func (rc *routerContext) Request() *http.Request {
+	return rc.Context.Request
+}
+
+func (rc *routerContext) ResponseWriter() http.ResponseWriter {
+	return rc.Context.Writer
+}

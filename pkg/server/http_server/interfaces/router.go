@@ -67,6 +67,10 @@ type RouterContextInterface interface {
 	Next()
 	Abort()
 	AbortWithStatus(code int)
+	AbortWithStatusJSON(code int, obj any)
+	// 底层原语（用于需要直接访问 net/http 语义的场景，如 OIDC token/userinfo 端点）
+	Request() *http.Request
+	ResponseWriter() http.ResponseWriter
 }
 
 // HandlerFunc 是业务 handler 的统一签名
