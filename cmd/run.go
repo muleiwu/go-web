@@ -36,7 +36,7 @@ func Start(opts ...Option) {
 		case sig := <-sigChan:
 			switch sig {
 			case syscall.SIGHUP:
-				getLogger().Info("收到 SIGHUP 信号，开始重启服务...")
+				getLogger().Info("收到 SIGHUP 信号，开始重载配置...")
 				stopServices(servers)
 				reloadConfiguration(o)
 				getLogger().Info("正在重新启动服务...")
@@ -51,12 +51,22 @@ func Start(opts ...Option) {
 			}
 
 		case <-reload.GetReloadChan():
-			getLogger().Info("收到重启请求，开始重启服务...")
+			getLogger().Info("收到 Reload 请求，开始重载配置...")
 			stopServices(servers)
 			reloadConfiguration(o)
 			getLogger().Info("正在重新启动服务...")
 			time.Sleep(100 * time.Millisecond)
 			continue
+
+		case <-reload.GetRestartChan():
+			getLogger().Info("收到 Restart 请求，准备 exec 自替换...")
+			stopServices(servers)
+			if err := execSelf(); err != nil {
+				getLogger().Error(fmt.Sprintf("exec 自替换失败: %v", err))
+				return
+			}
+			// syscall.Exec 成功时进程映像已被替换，下面的代码不会执行
+			return
 		}
 	}
 }
