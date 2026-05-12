@@ -53,6 +53,17 @@ func (d *DiskStaticDriver) ServeFile(c *gin.Context, dir string, relativePath st
 	return fmt.Errorf("file not found")
 }
 
+// ServeSPAFallback 直接写出 index.html 字节流，避免 http.ServeFile 的路径规范化重定向
+func (d *DiskStaticDriver) ServeSPAFallback(c *gin.Context, dir string) error {
+	indexPath := fmt.Sprintf("%s/%s/index.html", d.baseDir, dir)
+	content, err := os.ReadFile(indexPath)
+	if err != nil {
+		return err
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", content)
+	return nil
+}
+
 // GetDriverName 获取驱动名称
 func (d *DiskStaticDriver) GetDriverName() string {
 	return "disk"

@@ -67,6 +67,17 @@ func (d *EmbedStaticDriver) ServeFile(c *gin.Context, dir string, relativePath s
 	return fmt.Errorf("file not found")
 }
 
+// ServeSPAFallback 直接写出 index.html 字节流，避免 http.FileServer 的路径规范化重定向
+func (d *EmbedStaticDriver) ServeSPAFallback(c *gin.Context, dir string) error {
+	indexPath := fmt.Sprintf("static/%s/index.html", dir)
+	content, err := fs.ReadFile(d.embedFS, indexPath)
+	if err != nil {
+		return err
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", content)
+	return nil
+}
+
 // fileExistsInFS 检查文件是否存在于文件系统中
 func (d *EmbedStaticDriver) fileExistsInFS(filesystem fs.FS, path string) bool {
 	path = strings.TrimPrefix(path, "/")

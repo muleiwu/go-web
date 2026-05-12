@@ -110,7 +110,7 @@ func (receiver *StaticHandler) setupStaticFileServers() {
 
 				// 文件不存在，SPA 模式下回退到 index.html，由前端路由处理
 				if spaFallback && relativePath != "/index.html" {
-					if err := receiver.driver.ServeFile(c, dir, "/index.html"); err == nil {
+					if err := receiver.driver.ServeSPAFallback(c, dir); err == nil {
 						return
 					}
 				}
