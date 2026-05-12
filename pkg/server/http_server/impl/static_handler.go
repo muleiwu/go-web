@@ -72,6 +72,10 @@ func (receiver *StaticHandler) setupStaticFileServers() {
 		logger.Debug(fmt.Sprintf("序号：%d 加载文件夹：%s", i, dir))
 	}
 
+	// SPA history 模式回退：未命中实体文件时，将路径回落到对应静态目录的 index.html，
+	// 让前端路由（Vue Router / React Router 等）接管。默认开启，可通过配置关闭。
+	spaFallback := config.GetBool("http.static_spa_fallback", true)
+
 	// 统一处理未匹配的路由
 	receiver.engine.NoRoute(func(c *gin.Context) {
 		// 只处理 GET 请求
@@ -102,6 +106,13 @@ func (receiver *StaticHandler) setupStaticFileServers() {
 				err := receiver.driver.ServeFile(c, dir, relativePath)
 				if err == nil {
 					return
+				}
+
+				// 文件不存在，SPA 模式下回退到 index.html，由前端路由处理
+				if spaFallback && relativePath != "/index.html" {
+					if err := receiver.driver.ServeFile(c, dir, "/index.html"); err == nil {
+						return
+					}
 				}
 
 				// 文件不存在，返回 404
