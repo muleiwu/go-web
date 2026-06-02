@@ -1,10 +1,12 @@
 package driver
 
 import (
+	"database/sql"
 	"fmt"
 
 	"cnb.cool/mliev/open/go-web/pkg/server/database/config"
-	"gorm.io/driver/mysql"
+	mysqlDriver "github.com/go-sql-driver/mysql"
+	gormmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +17,22 @@ func MysqlFactory(cfg any) (*gorm.DB, error) {
 	if !ok {
 		return nil, fmt.Errorf("database mysql driver: config must be *DatabaseConfig, got %T", cfg)
 	}
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dc.Username, dc.Password, dc.Host, dc.Port, dc.DBName)
-	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	driverCfg, err := dc.MySQLDriverConfig()
+	if err != nil {
+		return nil, err
+	}
+	connector, err := mysqlDriver.NewConnector(driverCfg)
+	if err != nil {
+		return nil, err
+	}
+	sqlDB := sql.OpenDB(connector)
+	db, err := gorm.Open(gormmysql.New(gormmysql.Config{
+		Conn:      sqlDB,
+		DSNConfig: driverCfg,
+	}), &gorm.Config{})
+	if err != nil {
+		_ = sqlDB.Close()
+		return nil, err
+	}
+	return db, nil
 }
