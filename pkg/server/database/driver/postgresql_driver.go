@@ -15,8 +15,10 @@ func PostgresqlFactory(cfg any) (*gorm.DB, error) {
 	if !ok {
 		return nil, fmt.Errorf("database postgresql driver: config must be *DatabaseConfig, got %T", cfg)
 	}
-	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
-		dc.Username, dc.Password, dc.Host, dc.Port, dc.DBName)
+	dsn := dc.GetPostgreSQLDSN()
+	if dsn == "" {
+		return nil, fmt.Errorf("database postgresql driver: invalid database config")
+	}
 	return gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
