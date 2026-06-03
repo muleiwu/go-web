@@ -50,15 +50,12 @@ func (dc *DatabaseConfig) GetPostgreSQLDSN() string {
 	if err := ValidateTCPPort(dc.Port); err != nil {
 		return ""
 	}
-	values := url.Values{}
-	values.Set("sslmode", "disable")
-	values.Set("TimeZone", "Asia/Shanghai")
 	return (&url.URL{
 		Scheme:   "postgres",
 		User:     url.UserPassword(dc.Username, dc.Password),
 		Host:     net.JoinHostPort(host, strconv.Itoa(dc.Port)),
 		Path:     dc.DBName,
-		RawQuery: values.Encode(),
+		RawQuery: "sslmode=disable&TimeZone=Asia/Shanghai",
 	}).String()
 }
 

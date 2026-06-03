@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func TestMySQLDriverConfigDoesNotPromoteDBNameToParams(t *testing.T) {
@@ -42,5 +43,34 @@ func TestNormalizeTCPHostRejectsDSNBreakoutCharacters(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "invalid DSN characters") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestPostgreSQLDSNKeepsTimezoneSlashUnescaped(t *testing.T) {
+	dc := &DatabaseConfig{
+		Host:     "postgresql",
+		Port:     5432,
+		DBName:   "dwz",
+		Username: "dwz",
+		Password: "secret @",
+	}
+
+	dsn := dc.GetPostgreSQLDSN()
+	if strings.Contains(dsn, "Asia%2FShanghai") {
+		t.Fatalf("timezone slash was percent-encoded: %s", dsn)
+	}
+	if !strings.Contains(dsn, "TimeZone=Asia/Shanghai") {
+		t.Fatalf("timezone query value missing from dsn: %s", dsn)
+	}
+	if !strings.Contains(dsn, "dwz:secret%20%40@") {
+		t.Fatalf("username/password were not safely URL-encoded: %s", dsn)
+	}
+
+	cfg, err := pgconn.ParseConfig(dsn)
+	if err != nil {
+		t.Fatalf("pgconn.ParseConfig returned error: %v", err)
+	}
+	if got := cfg.RuntimeParams["TimeZone"]; got != "Asia/Shanghai" {
+		t.Fatalf("unexpected parsed timezone: %q", got)
 	}
 }
