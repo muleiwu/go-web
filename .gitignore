@@ -1,3 +1,6 @@
 .idea/
 config.yaml
 /.claude
+/go-web
+/migrate
+/bin/
