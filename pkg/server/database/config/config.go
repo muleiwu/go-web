@@ -15,22 +15,24 @@ import (
 )
 
 type DatabaseConfig struct {
-	Driver   string `json:"driver"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	DBName   string `json:"dbname"`
+	Driver               string `json:"driver"`
+	Username             string `json:"username"`
+	Password             string `json:"password"`
+	Host                 string `json:"host"`
+	Port                 int    `json:"port"`
+	DBName               string `json:"dbname"`
+	PreferSimpleProtocol bool   `json:"prefer_simple_protocol"`
 }
 
 func NewConfig(config gsr.Provider) *DatabaseConfig {
 	return &DatabaseConfig{
-		Driver:   config.GetString("database.driver", "postgresql"),
-		Host:     config.GetString("database.host", "127.0.0.1"),
-		Port:     config.GetInt("database.port", 5432),
-		DBName:   config.GetString("database.dbname", "test"),
-		Username: config.GetString("database.username", "test"),
-		Password: config.GetString("database.password", "123456"),
+		Driver:               config.GetString("database.driver", "postgresql"),
+		Host:                 config.GetString("database.host", "127.0.0.1"),
+		Port:                 config.GetInt("database.port", 5432),
+		DBName:               config.GetString("database.dbname", "test"),
+		Username:             config.GetString("database.username", "test"),
+		Password:             config.GetString("database.password", "123456"),
+		PreferSimpleProtocol: config.GetBool("database.prefer_simple_protocol", false),
 	}
 }
 

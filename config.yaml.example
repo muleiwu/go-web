@@ -13,6 +13,7 @@ http:
 database:
   migration:
     dir: "migrations"
+  prefer_simple_protocol: false
   host: localhost
   port: 3306
   username: root
@@ -81,4 +82,4 @@ cors:
   allow_headers:
     - "Origin"
     - "Content-Type"
-    - "Authorization" 
+    - "Authorization"
