@@ -4,9 +4,25 @@ import (
 	"strings"
 	"testing"
 
+	configImpl "cnb.cool/mliev/open/go-web/pkg/server/config/impl"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v5/pgconn"
 )
+
+func TestNewConfigDisablesSimpleProtocolByDefault(t *testing.T) {
+	provider := configImpl.NewConfig()
+	if got := NewConfig(provider).PreferSimpleProtocol; got {
+		t.Fatal("PreferSimpleProtocol = true, want false by default")
+	}
+}
+
+func TestNewConfigAllowsSimpleProtocolOptIn(t *testing.T) {
+	provider := configImpl.NewConfig()
+	provider.Set("database.prefer_simple_protocol", true)
+	if got := NewConfig(provider).PreferSimpleProtocol; !got {
+		t.Fatal("PreferSimpleProtocol = false, want explicit true")
+	}
+}
 
 func TestMySQLDriverConfigDoesNotPromoteDBNameToParams(t *testing.T) {
 	dc := &DatabaseConfig{
